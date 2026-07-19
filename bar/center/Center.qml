@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Hyprland
 import "../components"
 import "../../services"
+import "../../Colors.js" as Colors
 
 Container {
     id: center
@@ -10,16 +11,15 @@ Container {
     hoverableWhenHidden: true
     exclusiveToScreen: true
     // forceHidden: true
-    hiddenTopMargin: (2-boxHeight)
-    boxHeight: 16
+    hiddenTopMargin: (4-boxHeight)
+    boxHeight: 18
     boxWidth: 70
     anchoredSides: [Container.Top]
 
-    content: [
-        Text {
-            text: Time.time
-            font.bold: true
-            anchors.centerIn: parent
-        }
-    ]
+    Text {
+        text: Time.time
+        font.bold: true
+        anchors.centerIn: parent
+        color: Colors.text
+    }
 }

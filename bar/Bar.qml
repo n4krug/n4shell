@@ -5,6 +5,7 @@ import Quickshell.Hyprland
 import "components"
 import "center"
 import "left"
+import "right"
 import "../drawing"
 
 Scope {
@@ -21,7 +22,7 @@ Scope {
 
                 color: "transparent"
                 exclusionMode: ExclusionMode.Normal
-                exclusiveZone: 20
+                exclusiveZone: 21
 
                 screen: modelData
 
@@ -29,16 +30,6 @@ Scope {
                     top: true
                     left: true
                     right: true
-                }
-
-                Container { // thin 2px line at the top of the bar
-                    id: topLine
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    implicitHeight: 2
-
-                    exclusiveMonitor: win.monitor
                 }
 
                 Canvas {
@@ -68,6 +59,15 @@ Scope {
                         topMargin: 0
                     }
 
+                    Container {
+                        exclusiveMonitor: win.monitor
+                        anchors {
+                            top: parent.top
+                            right: parent.right
+                            left: parent.left
+                        }
+                        boxHeight: 1
+                    }
                     
                     Row {
                         id: left
@@ -103,13 +103,17 @@ Scope {
                             right: parent.right
                         }
 
-                        Container {
+                        Right {
                             exclusiveMonitor: win.monitor
-                            anchoredSides: [Container.Top]
-                            hiddenTopMargin: (4-boxHeight)
-                            forceHidden: true
-                            hoverableWhenHidden: true
                         }
+                        // Container {
+                        //     exclusiveMonitor: win.monitor
+                        //     anchoredSides: []
+                        //     hiddenTopMargin: (4-boxHeight)
+                        //     visibleTopMargin: 5
+                        //     forceHidden: true
+                        //     hoverableWhenHidden: true
+                        // }
                     }
                 }
             }

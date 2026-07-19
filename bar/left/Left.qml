@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 
 import "../components"
 import "../../services"
+import "../../Colors.js" as Colors
 
 Container {
     id: root
@@ -11,45 +12,45 @@ Container {
     anchoredSides: [Container.Top, Container.Left]
     boxHeight: 20
 
-    implicitWidth: workspaces.implicitWidth + workspaces.anchors.leftMargin + 8
+    implicitWidth: workspaces.implicitWidth + workspaces.anchors.leftMargin*2
 
     required property HyprlandMonitor monitor
 
-    content: [
-        Row {
-            id: workspaces
-            anchors.left: parent.left
-            anchors.leftMargin: 8
-            anchors.verticalCenter: parent.verticalCenter
 
-            spacing: 4
+    Row {
+        id: workspaces
+        anchors.left: parent.left
+        anchors.leftMargin: 8
+        anchors.verticalCenter: parent.verticalCenter
 
-            Repeater {
-                model: WorkspaceManager.getWorkspacesForMonitor(root.monitor)
+        spacing: 4
 
 
-                Rectangle {
-                    id: box
-                    required property HyprlandWorkspace modelData
+        Repeater {
+            // model: WorkspaceManager.getWorkspacesForMonitor(root.monitor)
+            model: WorkspaceManager.getAllNumberedWorkspaces()
 
-                    radius: 4
+            Rectangle {
+                id: box
+                required property HyprlandWorkspace modelData
 
-                    implicitWidth: 12
-                    implicitHeight: 12
+                radius: 4
 
-                    color: modelData.active ? "#00FFFF" : "#005555" 
+                implicitWidth: 12
+                implicitHeight: 12
 
-                    Text {
-                        text: box.modelData.name
-                        visible: !box.modelData.active
-                        anchors.centerIn: parent
-                        font.bold: true
-                        font.pixelSize: 8
-                        color: "white"
-                        font.family: "JetBrainsMono Nerd Font Mono"
-                    }
+                color: modelData.active ? modelData.focused ? Colors.highlight : Colors.bg2 : "transparent"
+
+                Text {
+                    text: box.modelData.name
+                    visible: !box.modelData.active
+                    anchors.centerIn: parent
+                    font.bold: true
+                    font.pixelSize: 10
+                    color: Colors.text
+                    // font.family: "JetBrainsMono Nerd Font Mono"
                 }
             }
         }
-    ]
+    }
 }

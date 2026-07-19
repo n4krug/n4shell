@@ -1,0 +1,39 @@
+import QtQuick
+import Quickshell.Services.UPower
+import Quickshell.Hyprland
+import "../components"
+import "../../Colors.js" as Colors
+
+MouseArea {
+    id: root
+    required property HyprlandMonitor exclusiveMonitor
+    anchors {
+        top: parent.bottom
+        topMargin: 4
+        right: parent.right
+    }
+
+    implicitWidth: container.implicitWidth
+
+    Container {
+        id: container
+        exclusiveMonitor: root.exclusiveMonitor
+        boxWidth: 100
+        boxHeight: 30
+
+
+
+        Text {
+            readonly property string percent: Math.round(UPower.displayDevice.percentage * 100) + "%"
+            readonly property string minLeft: Math.round(UPower.displayDevice.timeToEmpty/6)/10 + "min"
+
+            text: percent + " " + minLeft
+            color: Colors.text
+            anchors.centerIn: parent
+        }
+
+        Component.onCompleted: {
+            console.log(JSON.stringify(UPower.displayDevice.timeToEmpty))
+        }
+    }
+}

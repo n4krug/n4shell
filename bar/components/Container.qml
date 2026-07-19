@@ -52,8 +52,8 @@ Item {
     }
 
     function rectIn(target) {
-        const topPt = root.mapToItem(target, 0, root.animatedTopMargin)
-        const bottomPt = root.mapToItem(target, 0, root.animatedTopMargin + root.boxHeight)
+        const topPt = root.mapToItem(target, 0, root.x)
+        const bottomPt = root.mapToItem(target, 0, root.x + root.height)
         return { x: topPt.x, y: topPt.y, w: root.width, h: bottomPt.y - topPt.y }
     }
 
@@ -84,12 +84,21 @@ Item {
     Behavior on animatedTopMargin {
         NumberAnimation {
             duration: 200
-            easing.type: Easing.Linear
+            easing.type: Easing.InOutCubic
         }
     }
 
-    readonly property real visibleHeight: {
-        return boxHeight + animatedTopMargin
+    Behavior on implicitWidth {
+        NumberAnimation {
+            duration: 100
+            easing.type: Easing.InOutCubic
+        }
+    }
+    Behavior on implicitHeight {
+        NumberAnimation {
+            duration: 100
+            easing.type: Easing.InOutCubic
+        }
     }
 
     property bool exclusiveToScreen: false
@@ -104,11 +113,14 @@ Item {
     implicitHeight: boxHeight
     implicitWidth: boxWidth
 
-    property alias content: contentHolder.children
-
     HoverHandler {
         id: hoverHandler
     }
+
+    // Rectangle {
+    //     anchors.fill: parent
+    //     color: root.boxColor
+    // }
 
     QtObject {
         id: hoverState
@@ -138,12 +150,6 @@ Item {
 
     anchors {
         top: parent.top
-    }
-
-    Item {
-        id: contentHolder
-        anchors.fill: parent
-        clip: true
-        transform: Translate { y: root.animatedTopMargin }
+        topMargin: root.animatedTopMargin
     }
 }
