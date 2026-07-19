@@ -5,15 +5,17 @@ QtObject {
     id: drawRegistry
     property var items: []
 
+    signal itemGeometryChanged
+
     function addItem(item) {
-        if (items.indexOf(item) === -1) 
-            items.push(item)
+        if (items.indexOf(item) === -1)
+            items = items.concat(item)
     }
 
     function removeItem(item) {
-        const index = items.indexOf(item)
-        if (index !== -1)
-            items.splice(index, 1)
+        if (items.indexOf(item) === -1)
+            return
+        items = items.filter(i => i !== item)
     }
 
     function getAll() {
@@ -21,6 +23,6 @@ QtObject {
     }
 
     function getOnMonitor(monitor) {
-        return items.filter(item => item.exclusiveMonitor === monitor)        
+        return items.filter(item => item.exclusiveMonitor === monitor)
     }
 }
