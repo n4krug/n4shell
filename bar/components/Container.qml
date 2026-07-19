@@ -3,6 +3,8 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Widgets
 
+import "../../drawing"
+
 Item {
     id: root
 
@@ -20,6 +22,11 @@ Item {
         Bottom,
         Left,
         Right
+    }
+
+    
+    Component.onCompleted: {
+        DrawRegistry.addItem(this)
     }
 
     property list<int> anchoredSides: []

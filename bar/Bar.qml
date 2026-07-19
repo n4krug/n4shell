@@ -31,22 +31,14 @@ Scope {
                     right: true
                 }
 
-                Container {
+                Container { // thin 2px line at the top of the bar
+                    id: topLine
                     anchors.top: parent.top
                     anchors.right: parent.right
                     anchors.left: parent.left
-                    implicitHeight: 5
+                    implicitHeight: 2
 
                     exclusiveMonitor: win.monitor
-                    
-                    Component.onCompleted: {
-                        DrawRegistry.addItem(this)
-                    }
-
-                    // Rectangle {
-                    //     color: "green"
-                    //     anchors.fill: parent
-                    // }
                 }
 
                 Canvas {
@@ -82,26 +74,9 @@ Scope {
 
                         height: childrenRect.height
 
-                        anchors {
-                            left: parent.left
-                        }
-
-                        // Container {
-                        //     exclusiveMonitor: win.monitor
-                        //     anchoredSides: [Container.Top, Container.Left]
-                        //     boxTLRadius: 0
-                        //     boxHeight: 16
-                        //     boxRadius: 8
-                        //     boxTRRadius: -boxRadius
-                        //     boxBLRadius: 0
-                        // }
-
                         Left {
                             monitor: win.monitor
                             exclusiveMonitor: win.monitor
-                            Component.onCompleted: {
-                                DrawRegistry.addItem(this)
-                            }
                         }
                     }
                     
@@ -114,23 +89,8 @@ Scope {
                             horizontalCenter: parent.horizontalCenter
                         }
 
-                        // Container {
-                        //     exclusiveMonitor: win.monitor
-                        //     hoverableWhenHidden: true
-                        //     exclusiveToScreen: true
-                        //     // forceHidden: true
-                        //     hiddenTopMargin: (4-boxHeight)
-                        //     boxHeight: 25
-                        //     boxRadius: 12
-                        //     boxTLRadius: -boxRadius
-                        //     boxTRRadius: -boxRadius
-                        //     anchoredSides: [Container.Top]
-                        // }
                         Center {
                             exclusiveMonitor: win.monitor
-                            Component.onCompleted: {
-                                DrawRegistry.addItem(this)
-                            }
                         }
                     }
 
@@ -153,9 +113,6 @@ Scope {
                             hiddenTopMargin: (4-boxHeight)
                             forceHidden: true
                             hoverableWhenHidden: true
-                            Component.onCompleted: {
-                                DrawRegistry.addItem(this)
-                            }
                         }
                     }
                 }
