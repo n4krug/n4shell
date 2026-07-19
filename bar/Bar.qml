@@ -106,10 +106,6 @@ Scope {
                         Container {
                             exclusiveMonitor: win.monitor
                             anchoredSides: [Container.Top]
-                            boxTRRadius: 0
-                            boxRadius: 12
-                            boxTLRadius: -boxRadius
-                            boxBRRadius: 0
                             hiddenTopMargin: (4-boxHeight)
                             forceHidden: true
                             hoverableWhenHidden: true

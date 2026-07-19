@@ -13,9 +13,6 @@ Container {
     hiddenTopMargin: (2-boxHeight)
     boxHeight: 16
     boxWidth: 70
-    boxRadius: 8
-    boxTLRadius: -boxRadius
-    boxTRRadius: -boxRadius
     anchoredSides: [Container.Top]
 
     content: [

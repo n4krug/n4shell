@@ -9,11 +9,7 @@ Container {
     id: root
 
     anchoredSides: [Container.Top, Container.Left]
-    boxTLRadius: 0
     boxHeight: 20
-    boxRadius: 8
-    boxTRRadius: -boxRadius
-    boxBLRadius: 0
 
     implicitWidth: workspaces.implicitWidth + workspaces.anchors.leftMargin + 8
 
