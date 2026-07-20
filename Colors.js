@@ -5,3 +5,5 @@ const text = "#D9AFA7"
 const highlight = outline
 const outlineWidth = 3
 const radius = 12
+
+const barHeight = 20

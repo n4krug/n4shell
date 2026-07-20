@@ -32,7 +32,7 @@ Scope {
                     right: true
                 }
 
-                Canvas {
+                DrawCanvas {
                     anchors.fill: parent
                     monitor: win.monitor
                 }
@@ -106,14 +106,6 @@ Scope {
                         Right {
                             exclusiveMonitor: win.monitor
                         }
-                        // Container {
-                        //     exclusiveMonitor: win.monitor
-                        //     anchoredSides: []
-                        //     hiddenTopMargin: (4-boxHeight)
-                        //     visibleTopMargin: 5
-                        //     forceHidden: true
-                        //     hoverableWhenHidden: true
-                        // }
                     }
                 }
             }

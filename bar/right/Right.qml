@@ -3,14 +3,15 @@ import Quickshell.Hyprland
 
 import "../components"
 import "./"
+import "../../Colors.js" as Colors
 
 Container {
     id: root
 
-    boxHeight: 20
+    boxHeight: Colors.barHeight
     boxWidth: icons.implicitWidth + icons.anchors.rightMargin*2
 
-    property real iconSize: 12
+    property real iconSize: Colors.barHeight - 8
 
     Row {
         id: icons
@@ -23,7 +24,7 @@ Container {
 
         Battery {
             iconSize: root.iconSize
-            monitor: root.exclusiveMonitor
+            exclusiveMonitor: root.exclusiveMonitor
         }
     }
 }

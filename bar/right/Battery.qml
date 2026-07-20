@@ -1,44 +1,23 @@
 import QtQuick
 import Quickshell
+import QtQuick.Effects
+import QtQuick.Controls
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import Quickshell.Services.UPower
 
+import "../components"
 import "../../Colors.js" as Colors
 
-MouseArea {
+pragma ComponentBehavior: Bound
+
+Container {
     id: root
 
     required property real iconSize
 
-    required property HyprlandMonitor monitor
-
-    implicitHeight: iconSize
-    implicitWidth: iconSize
-    
-    // Rectangle {
-    //     anchors.fill: parent
-    //     anchors {
-    //         margins: 2
-    //     }
-    //     color: Colors.bg2
-    //     radius: Colors.radius/2
-    // }
-
-    property bool popupOpen: false
-
-    onPressed: (mouse) => {
-        var mappedPos = root.mapToItem(null, root.x, root.y)
-
-        if (popupOpen) {
-            Popup.close()
-        } else {
-            Popup.create(root, "BatteryInfo.qml", mappedPos, () => {
-                popupOpen = false
-            })
-            popupOpen = true   
-        }
-    }
+    boxHeight: iconSize
+    boxWidth: iconSize
 
     Text {
         text: {
@@ -61,4 +40,16 @@ MouseArea {
         font.pixelSize: 12
     }
 
+    BatteryInfo {
+        exclusiveMonitor: root.exclusiveMonitor
+        open: true
+    }
+
+        hover.onHoveredChanged: {
+            console.log("hover")
+        }
+
+        HoverHandler {
+            id: hoverHandler
+        }
 }

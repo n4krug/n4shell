@@ -11,10 +11,9 @@ Container {
     hoverableWhenHidden: true
     exclusiveToScreen: true
     // forceHidden: true
-    hiddenTopMargin: (4-boxHeight)
-    boxHeight: 18
+    hiddenTopMargin: -boxHeight
+    boxHeight: Colors.barHeight
     boxWidth: 70
-    anchoredSides: [Container.Top]
 
     Text {
         text: Time.time

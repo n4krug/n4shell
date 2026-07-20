@@ -30,8 +30,6 @@ Item {
         DrawRegistry.removeItem(this)
     }
 
-    property list<int> anchoredSides: []
-
     onGeometryChanged: DrawRegistry.itemGeometryChanged()
 
     onXChanged: geometryChanged()
@@ -41,7 +39,6 @@ Item {
     onCalculatedTopMarginChanged: geometryChanged()
     onAnimatedTopMarginChanged: geometryChanged()
     onBoxColorChanged: geometryChanged()
-    onAnchoredSidesChanged: geometryChanged()
 
     Connections {
         target: root.parent
@@ -61,7 +58,6 @@ Item {
         return {
             rect: rectIn(target),
             color: root.boxColor,
-            anchoredSides: root.anchoredSides
         }
     }
 
