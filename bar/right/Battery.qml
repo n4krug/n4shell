@@ -16,6 +16,8 @@ Container {
 
     required property real iconSize
 
+    required property PopupContainer popupContainer
+
     boxHeight: iconSize
     boxWidth: iconSize
 
@@ -34,22 +36,35 @@ Container {
             else if (level >= 10) return "󰁺"
             else return "󰂃"
         }
-        color: UPower.displayDevice.percentage > 0.3 ? Colors.text : Colors.outline
+        readonly property string colorString: {
+
+            if (UPower.displayDevice.percentage < 0.3) {
+                return Colors.outline
+            }
+
+            if (UPower.displayDevice.changeRate > 0) {
+                return Colors.green
+            }            
+
+            return Colors.text
+        }
+        color: colorString
         anchors.centerIn: parent
         font.family: "Symbols Nerd Font" // Or Material Icons
-        font.pixelSize: 12
+        font.pixelSize: root.iconSize
     }
 
-    BatteryInfo {
-        exclusiveMonitor: root.exclusiveMonitor
-        open: true
+    Component {
+        id: batteryInfoComp
+        BatteryInfo { 
+            exclusiveMonitor: root.exclusiveMonitor
+            anchors.fill: parent 
+            popupContainer: root.popupContainer
+        }
     }
 
-        hover.onHoveredChanged: {
-            console.log("hover")
-        }
-
-        HoverHandler {
-            id: hoverHandler
-        }
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        onTapped: root.popupContainer.show(batteryInfoComp)
+    }
 }

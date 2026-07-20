@@ -12,30 +12,31 @@ import "../../Colors.js" as Colors
 
 Container {
     id: root
-    exclusiveMonitor: root.exclusiveMonitor
 
-    required property bool open
+    required property PopupContainer popupContainer
+
     anchors {
         top: parent.bottom
         right: parent.right
-        rightMargin: 5
-        topMargin: 4
     }
-    boxHeight: 100
-    boxWidth: 100
+    boxHeight: 70
+    boxWidth: 70
 
-    Rectangle {
-        id: rect
-        anchors.fill: parent
-        opacity: 0.5
+    Text {
+        readonly property UPowerDevice device: UPower.displayDevice
+        readonly property string percentage: Math.round(device.percentage*100) + "%"
+        readonly property string rate: Math.round(device.changeRate) + "W"
+        readonly property string timeLeft: Math.round(device.timeToEmpty/6)/10 + "min"
+
+        text: percentage + "\n" + rate + "\n" + timeLeft
+        color: Colors.text
+        anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
     }
 
     hover.onHoveredChanged: {
-        console.log("hover")
-        if (hover.hovered) {
-            rect.color = "green"
-        } else {
-            rect.color = "red"
+        if (!hover.hovered) {
+            popupContainer.hide()
         }
     }
 

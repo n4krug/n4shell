@@ -49,9 +49,10 @@ Item {
     }
 
     function rectIn(target) {
-        const topPt = root.mapToItem(target, 0, root.x)
-        const bottomPt = root.mapToItem(target, 0, root.x + root.height)
-        return { x: topPt.x, y: topPt.y, w: root.width, h: bottomPt.y - topPt.y }
+        // const topPt = root.mapToItem(target, root.x, root.y)
+        const topPt = root.mapToItem(null, 0, 0)
+        // const bottomPt = root.mapToItem(target, root.x, root.y + root.height)
+        return { x: topPt.x, y: topPt.y, w: root.width, h: height }
     }
 
     function geomIn(target) {
