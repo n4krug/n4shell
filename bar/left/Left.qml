@@ -59,7 +59,7 @@ Container {
                     }
                 }
 
-                color: modelData.active ? modelData.focused ? Colors.highlight : Colors.bg2 : "transparent"
+                color: modelData.active ? modelData.focused ? Colors.highlight : Colors.bg3 : "transparent"
 
                 Text {
                     text: box.modelData.name

@@ -39,7 +39,7 @@ Container {
         readonly property string colorString: {
 
             if (UPower.displayDevice.percentage < 0.3) {
-                return Colors.outline
+                return Colors.negative
             }
 
             if (UPower.displayDevice.changeRate > 0) {

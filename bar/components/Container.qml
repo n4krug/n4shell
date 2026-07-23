@@ -12,13 +12,6 @@ Item {
     property real boxHeight: 28
     property real boxWidth: 100
 
-    enum Anchor {
-        Top,
-        Bottom,
-        Left,
-        Right
-    }
-
     property Item canvasRef: null
 
     signal geometryChanged
@@ -35,7 +28,7 @@ Item {
     onXChanged: geometryChanged()
     onYChanged: geometryChanged()
     onWidthChanged: geometryChanged()
-    onBoxHeightChanged: geometryChanged()
+    onHeightChanged: geometryChanged()
     onCalculatedTopMarginChanged: geometryChanged()
     onAnimatedTopMarginChanged: geometryChanged()
     onBoxColorChanged: geometryChanged()

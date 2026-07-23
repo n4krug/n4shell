@@ -34,13 +34,4 @@ Container {
         horizontalAlignment: Text.AlignHCenter
     }
 
-    hover.onHoveredChanged: {
-        if (!hover.hovered) {
-            popupContainer.hide()
-        }
-    }
-
-    HoverHandler {
-        id: hoverHandler
-    }
  }

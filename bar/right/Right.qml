@@ -37,6 +37,18 @@ Item {
 
             spacing: 4
 
+            Bluetooth {
+                iconSize: root.iconSize
+                exclusiveMonitor: root.exclusiveMonitor
+                
+                popupContainer: popup
+            }
+
+            Network {
+                iconSize: root.iconSize
+                exclusiveMonitor: root.exclusiveMonitor
+            }
+
             Battery {
                 iconSize: root.iconSize
                 exclusiveMonitor: root.exclusiveMonitor
@@ -50,9 +62,10 @@ Item {
         anchors {
             top: parent.top
             right: parent.right
-            topMargin: root.margin + root.iconSize
             rightMargin: root.margin
         }
+        visibleTopMargin: root.margin + root.iconSize
+
         exclusiveMonitor: root.exclusiveMonitor
         id: popup
     }
