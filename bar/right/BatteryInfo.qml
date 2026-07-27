@@ -13,7 +13,7 @@ import "../../Colors.js" as Colors
 Container {
     id: root
 
-    required property PopupContainer popupContainer
+    // required property PopupContainer popupContainer
 
     anchors {
         top: parent.bottom

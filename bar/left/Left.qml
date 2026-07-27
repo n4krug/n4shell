@@ -59,14 +59,14 @@ Container {
                     }
                 }
 
-                color: modelData.active ? modelData.focused ? Colors.highlight : Colors.bg3 : "transparent"
+                color: modelData.active ? Colors.bg3 : "transparent"
 
                 Text {
                     text: box.modelData.name
                     anchors.centerIn: parent
                     font.bold: true
                     font.pixelSize: Colors.barHeight - 10
-                    color: box.modelData.active ? !box.modelData.focused ? Colors.bg1 : "transparent" : Colors.text
+                    color: box.modelData.active && !box.modelData.focused ? Colors.bg1 : Colors.text
                     Behavior on color {
                         ColorAnimation {
                             duration: 300
@@ -74,6 +74,77 @@ Container {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    Rectangle {
+        id: focusIndicator
+
+        property int oldId: 0
+        readonly property real targetWidth: Colors.barHeight - workspaces.anchors.leftMargin
+
+        property real animatedLeft: 0
+        property real animatedRight: targetWidth
+        
+        readonly property real fast: 80
+        readonly property real slow: 300
+
+        property real leftDuration: fast
+        property real rightDuration: fast
+
+        height: targetWidth
+        width: animatedRight - animatedLeft
+        x: animatedLeft + workspaces.anchors.leftMargin
+        y: workspaces.anchors.leftMargin/2
+
+        color: Colors.highlight
+
+        radius: 4
+
+        property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
+
+        onFocusedWorkspaceChanged: {
+            move()
+        }
+
+        function slotX(index) {
+            return index * (targetWidth + workspaces.spacing)
+        }
+
+        function move() {
+            const id = WorkspaceManager.getAllNumberedWorkspaces().findIndex(workspace => workspace.focused)
+            const left = slotX(id)
+            const right = left + targetWidth
+
+            if (id > oldId) { // moving right
+                rightDuration = fast
+                leftDuration = slow
+            } else if (id < oldId) { // moving left
+                rightDuration = slow
+                leftDuration = fast
+            }
+
+            animatedLeft = left
+            animatedRight = right
+
+            oldId = id
+        }
+
+        Component.onCompleted: {
+            move()
+        }
+
+        Behavior on animatedLeft {
+            NumberAnimation {
+                duration: focusIndicator.leftDuration
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on animatedRight {
+            NumberAnimation {
+                duration: focusIndicator.rightDuration
+                easing.type: Easing.OutCubic
             }
         }
     }

@@ -59,7 +59,7 @@ Container {
         BatteryInfo { 
             exclusiveMonitor: root.exclusiveMonitor
             anchors.fill: parent 
-            popupContainer: root.popupContainer
+            // popupContainer: root.popupContainer
         }
     }
 

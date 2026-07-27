@@ -11,7 +11,7 @@ Item {
     required property HyprlandMonitor exclusiveMonitor
 
     implicitHeight: iconContainer.implicitHeight + popup.implicitHeight
-    implicitWidth: Math.max(icons.implicitWidth + icons.anchors.rightMargin*2, popup.width)
+    implicitWidth: Math.max(iconContainer.width, popup.width)
 
     property real margin: 8
 
@@ -24,7 +24,7 @@ Item {
             top: parent.top
             right: parent.right
         }
-        boxWidth: icons.implicitWidth + icons.anchors.rightMargin*2
+        boxWidth: icons.width + icons.anchors.rightMargin*2
         boxHeight: Colors.barHeight
         Row {
             id: icons
@@ -34,8 +34,43 @@ Item {
             // anchors.verticalCenter: parent.verticalCenter
             anchors.top: parent.top
             anchors.topMargin: root.margin/2
+            // anchors.fill: parent
 
             spacing: 4
+
+            // Item {
+            //     clip: true
+            //     // height: root.height
+            //     anchors {
+            //         top: parent.top
+            //         bottom: parent.bottom
+            //         right: parent.right
+            //     }
+            //     width: iconContainer.hover.hovered ? 100 : 0
+
+            //     Row {
+            //         id: tray
+            //         anchors {
+            //             top: parent.right
+            //             right: parent.right
+            //             // bottom: parent.bottom
+            //         }
+            //         height: parent.height
+            //         width: animatedWidth
+            //         property real animatedWidth: parent.width
+
+            //         Behavior on animatedWidth {
+            //             NumberAnimation {
+            //                 duration: 200
+            //                 easing.type: Easing.Linear
+            //             }
+            //         }
+
+            //         spacing: 4
+                    
+                    
+            //     }
+            // }
 
             Bluetooth {
                 iconSize: root.iconSize

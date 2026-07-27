@@ -41,7 +41,7 @@ Canvas {
         rounded.forEach(contour => {
             
             ctx.beginPath()
-            ctx.strokeStyle = Colors.outline
+            ctx.strokeStyle = Hyprland.focusedMonitor == canvas.monitor ? Colors.outline : Colors.bg2
             ctx.fillStyle = Colors.bg1
             ctx.lineWidth = Colors.outlineWidth
             ctx.lineJoin = "round"

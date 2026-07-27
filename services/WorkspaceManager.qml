@@ -6,6 +6,8 @@ import Quickshell.Hyprland
 Singleton {
   id: root
 
+  
+
   function activateNextFreeWorkspace() {
 	let nextFree = getNextFreeWorkspace();
 	activateWorkspaceById(nextFree);

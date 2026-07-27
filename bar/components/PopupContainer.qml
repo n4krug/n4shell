@@ -11,6 +11,8 @@ Container {
     property real animatedOpacity: 0
     opacity: animatedOpacity
 
+    readonly property bool shown: loader.active
+
     Behavior on animatedOpacity {
         NumberAnimation {
             duration: 200
