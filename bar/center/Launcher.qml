@@ -127,6 +127,7 @@ Container {
                 opacity: 0.15
                 color: Colors.highlight
             }
+            highlightResizeDuration: 0
 
             delegate: Item {
                 id: entry
