@@ -86,8 +86,9 @@ Container {
                 } else if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key)) {
                     event.accepted = true;
                     root.launchSelected();
-                } else if (event.key == Qt.Key_C && ctrl) {
+                } else if (event.key == Qt.Key_Q && ctrl) {
                     event.accepted = true;
+                    root.show = false
                 }
             }
         }
@@ -97,7 +98,9 @@ Container {
         ScriptModel {
             id: filtered
             values: {
-                const allEntries = [...DesktopEntries.applications.values];
+                const allEntries = [...DesktopEntries.applications.values].sort((a,b) => {
+                    return ('' + a.name).localeCompare(b.name);
+                });
                 const q = root.query.trim();
 
                 if (q === "") {
