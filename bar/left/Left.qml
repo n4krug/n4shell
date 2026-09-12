@@ -35,6 +35,12 @@ Container {
                 id: box
                 required property HyprlandWorkspace modelData
 
+                TapHandler {
+                    onTapped: {
+                        box.modelData.activate()
+                    }
+                }
+
                 radius: 4
 
                 implicitWidth: Colors.barHeight - workspaces.anchors.leftMargin 

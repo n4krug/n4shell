@@ -23,6 +23,6 @@ QtObject {
     }
 
     function getOnMonitor(monitor) {
-        return items.filter(item => item.exclusiveMonitor === monitor)
+        return items.filter(item => item.exclusiveMonitor === monitor && item.visible)
     }
 }

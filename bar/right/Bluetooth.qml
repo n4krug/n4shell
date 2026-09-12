@@ -20,10 +20,17 @@ Container {
     visible: Bluetooth.defaultAdapter.enabled
 
     Text {
-		text: BluetoothManager.getConnected() == true ? "󰂱" : BluetoothManager.defaultAdapter.enabled ? "󰂯" : "󰂲"
+		text: BluetoothManager.getConnected() == true ? "bluetooth_connected" : BluetoothManager.defaultAdapter.enabled ? "bluetooth" : "bluetooth_disabled"
         color: BluetoothManager.defaultAdapter.enabled ? Colors.text : Colors.negative
         font.pixelSize: root.iconSize
         anchors.centerIn: parent
+        font.family: "Material Symbols Rounded" // Or Material Icons
+        font.variableAxes: {
+            "FILL": 0,
+            "wght": 600,
+            "GRAD": 0,
+            "opsz": root.iconSize
+        }
     }
 
     Component {
@@ -112,6 +119,13 @@ Container {
                             Text {
                                 text: BluetoothManager.getIcon(itemRoot.modelData.icon)
                                 color: Colors.text
+                                font.family: "Material Symbols Rounded" // Or Material Icons
+                                font.variableAxes: {
+                                    "FILL": 0,
+                                    "wght": 600,
+                                    "GRAD": 0,
+                                    "opsz": root.iconSize
+                                }
                             }
                             Text {
                                 text: itemRoot.modelData.deviceName

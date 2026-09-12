@@ -7,6 +7,8 @@ import "center"
 import "left"
 import "right"
 import "../drawing"
+import "../Colors.js" as Colors
+import "../services"
 
 Scope {
     Variants {
@@ -37,7 +39,7 @@ Scope {
                     monitor: win.monitor
                 }
                     
-                implicitHeight: 1000
+                implicitHeight: monitor.height / monitor.scale
 
                 mask: Region {
                     Region {
@@ -50,6 +52,14 @@ Scope {
 
                     Region {
                         item: right
+                    }
+
+                    Region {
+                        item: notifications
+                    }
+                    
+                    Region {
+                        item: appLauncher
                     }
                 }
 
@@ -67,6 +77,35 @@ Scope {
                             left: parent.left
                         }
                         boxHeight: 1
+                    }
+
+                    
+                    Column {
+                        id: notifications
+
+                        anchors {
+                            top: parent.top
+                            topMargin: Colors.barHeight + 8
+                            right: parent.right
+                            rightMargin: 8
+                        }
+
+                        spacing: 8
+
+                        Repeater {
+                            model: NotificationManager.notifications
+
+                            delegate: NotificationBox {
+                                exclusiveMonitor: win.monitor
+                            }
+                        }
+                    }
+
+                    Launcher {
+                        id: appLauncher
+
+                        exclusiveMonitor: win.monitor
+                        anchors.centerIn: parent
                     }
                     
                     Row {
@@ -108,6 +147,27 @@ Scope {
                         }
                     }
                 }
+
+                // Column {
+                //     id: notifications
+
+                //     anchors {
+                //         top: parent.top
+                //         topMargin: Colors.barHeight + 8
+                //         right: parent.right
+                //         rightMargin: 8
+                //     }
+
+                //     spacing: 8
+
+                //     Repeater {
+                //         model: NotificationManager.notifications
+
+                //         delegate: NotificationBox {
+                //             exclusiveMonitor: Hyprland.monitorFor(modelData)
+                //         }
+                //     }
+                // }
             }
         }
     }

@@ -31,6 +31,7 @@ Item {
         Text {
             text: Time.time
             font.bold: true
+            // font.family: "Rubik 80s Fade"
             anchors.centerIn: parent
             color: Colors.text
         }

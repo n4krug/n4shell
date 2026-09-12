@@ -16,18 +16,11 @@ Container {
         readonly property string icon: {
             const fullConnectivity = Networking.connectivity == NetworkConnectivity.Full
             const wifiLevels = [
-                "󰤯",
-                "󰤟",
-                "󰤢",
-                "󰤥",
-                "󰤨"
-            ]
-            const wifiLevelsNotFull = [
-                "󰤫",
-                "󰤠",
-                "󰤣",
-                "󰤦",
-                "󰤩"
+                "signal_wifi_0_bar",
+                "network_wifi_1_bar",
+                "network_wifi_2_bar",
+                "network_wifi_3_bar",
+                "signal_wifi_4_bar",
             ]
 
             let dev = null
@@ -47,18 +40,26 @@ Container {
                     iconId--
                 }
 
-                return fullConnectivity ? wifiLevels[iconId] : wifiLevelsNotFull[iconId]
+                return wifiLevels[iconId]
             }
 
             if (dev.type == DeviceType.Wired) {
-                return fullConnectivity ? "󰛳" : "󰲛"
+                return "settings_ethernet"
+                // return fullConnectivity ? "󰛳" : "󰲛"
             }
             
-            return "󰤯"
+            return "signal_wifi_off"
         }
         text: icon
         font.pixelSize: root.iconSize
         color: Colors.text
         anchors.centerIn: parent
+        font.family: "Material Symbols Rounded" // Or Material Icons
+        font.variableAxes: {
+            "FILL": 0,
+            "wght": 600,
+            "GRAD": 0,
+            "opsz": root.iconSize
+        }
     }
 }

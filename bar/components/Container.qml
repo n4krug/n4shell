@@ -32,6 +32,7 @@ Item {
     onCalculatedTopMarginChanged: geometryChanged()
     onAnimatedTopMarginChanged: geometryChanged()
     onBoxColorChanged: geometryChanged()
+    onVisibleChanged: geometryChanged()
 
     Connections {
         target: root.parent

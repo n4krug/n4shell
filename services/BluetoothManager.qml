@@ -29,7 +29,7 @@ Singleton {
 
   function getIcon(name) {
 	const icons = {
-	  "audio-card": "󰓃",
+	  "audio-card": "speaker",//"󰓃",
 	  "audio-input-microphone": "",
 	  "audio-headphones": "󰋋",
 	  "audio-headset": "󰋋",
