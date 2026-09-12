@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 
 import "components"
 import "center"
@@ -27,6 +28,8 @@ Scope {
                 exclusiveZone: 21
 
                 screen: modelData
+
+                WlrLayershell.keyboardFocus: appLauncher.show ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
                 anchors {
                     top: true
