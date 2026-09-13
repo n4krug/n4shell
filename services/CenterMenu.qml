@@ -1,6 +1,5 @@
 pragma Singleton
 import QtQuick
-import Quickshell.Wayland
 
 QtObject {
     id: centerMenu
@@ -13,6 +12,11 @@ QtObject {
             items = items.concat(menu)
     }
 
+    function removeMenu(menu) {
+        items = items.filter(item => item !== menu)
+        refresh()
+    }
+
     function hideOthers(menu) {
         items.forEach(item => {
             if (item !== menu)
@@ -20,8 +24,7 @@ QtObject {
         })
     }
 
-    onAnyShownChanged: {
-        console.log(anyShown)
+    function refresh() {
+        anyShown = items.some(item => item.show)
     }
-    
 }

@@ -40,6 +40,10 @@ Container {
         CenterMenu.addMenu(this)
     }
 
+    Component.onDestruction: {
+        CenterMenu.removeMenu(this)
+    }
+
     onShowChanged: {
         if (show) {
             Qt.callLater(()=>input.forceActiveFocus())
@@ -48,7 +52,7 @@ Container {
             input.text = ""
             input.focus = false
         }
-        CenterMenu.anyShown = show
+        CenterMenu.refresh()
     }
 
     ColumnLayout {
