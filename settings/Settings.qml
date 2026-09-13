@@ -5,9 +5,9 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Widgets
 
-import "../components"
-import "../../services"
-import "../../Colors.js" as Colors
+import "../bar/components"
+import "../services"
+import "../Colors.js" as Colors
 
 pragma ComponentBehavior: Bound
 
@@ -29,7 +29,7 @@ Container {
 
     GlobalShortcut {
         appid: "n4shell"
-        name: "launcher"
+        name: "settings"
         onPressed: {
             if (Hyprland.focusedMonitor !== root.exclusiveMonitor) return
             root.show = !root.show

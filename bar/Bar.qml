@@ -10,6 +10,7 @@ import "right"
 import "../drawing"
 import "../Colors.js" as Colors
 import "../services"
+import "../settings"
 
 Scope {
     Variants {
@@ -29,7 +30,7 @@ Scope {
 
                 screen: modelData
 
-                WlrLayershell.keyboardFocus: appLauncher.show ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+                WlrLayershell.keyboardFocus: CenterMenu.anyShown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
                 anchors {
                     top: true
@@ -63,6 +64,10 @@ Scope {
                     
                     Region {
                         item: appLauncher
+                    }
+                    
+                    Region {
+                        item: settings
                     }
                 }
 
@@ -106,6 +111,13 @@ Scope {
 
                     Launcher {
                         id: appLauncher
+
+                        exclusiveMonitor: win.monitor
+                        anchors.centerIn: parent
+                    }
+                    
+                    Settings {
+                        id: settings
 
                         exclusiveMonitor: win.monitor
                         anchors.centerIn: parent
