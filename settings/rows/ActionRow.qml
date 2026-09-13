@@ -21,14 +21,14 @@ Item {
             visible: text !== ""
             color: Colors.text
             font.family: "Material Symbols Rounded"
-            font.pixelSize: 20
+            font.pixelSize: 28
             font.variableAxes: {
                 "FILL": 0,
-                "wght": 600,
+                "wght": 400,
                 "GRAD": 0,
-                "opsz": 20
+                "opsz": 28
             }
-            Layout.preferredWidth: 24
+            Layout.preferredWidth: 32
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -39,7 +39,7 @@ Item {
             Text {
                 text: root.row ? root.row.title : ""
                 color: Colors.text
-                font.pixelSize: 14
+                font.pixelSize: 16
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -49,7 +49,7 @@ Item {
                 visible: text !== ""
                 color: Colors.text
                 opacity: 0.6
-                font.pixelSize: 11
+                font.pixelSize: 14
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }

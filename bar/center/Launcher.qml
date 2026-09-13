@@ -171,9 +171,9 @@ Container {
                     }
                     Text {
                         id: label
-                        color: "white"
+                        color: Colors.text
                         text: modelData.name
-                        font.pointSize: 16
+                        font.pointSize: 14
                         elide: Text.ElideRight
                         verticalAlignment: Text.AlignVCenter
                         anchors.verticalCenter: parent.verticalCenter

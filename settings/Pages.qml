@@ -20,4 +20,17 @@ MenuPage {
             NetworkPage {}
         }
     }
+
+    MenuRow {
+        kind: "submenu"
+        title: "Bluetooth"
+        icon: "bluetooth"
+        page: bluetoothPage
+
+        Component {
+            id: bluetoothPage
+
+            BluetoothPage {}
+        }
+    }
 }
