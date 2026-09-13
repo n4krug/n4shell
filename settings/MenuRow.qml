@@ -5,6 +5,7 @@ Item {
     id: root
 
     property string title: ""
+    property string rowId: ""
     property string subtitle: ""
     property string icon: ""
     property string kind: "action"

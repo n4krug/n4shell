@@ -10,6 +10,7 @@ Item {
     property string title: "Connect to Wi-Fi"
     property var rows: []
 
+    property bool preview: false
     property var device: null
 
     readonly property var networks: {
@@ -22,14 +23,14 @@ Item {
     onNetworksChanged: root.rebuild()
 
     Component.onCompleted: {
-        if (root.device)
+        if (root.device && !root.preview)
             root.device.scannerEnabled = true
 
         root.rebuild()
     }
 
     Component.onDestruction: {
-        if (root.device)
+        if (root.device && !root.preview)
             root.device.scannerEnabled = false
     }
 
@@ -67,7 +68,24 @@ Item {
 
                 return parts.join(" · ")
             }
-            icon: "wifi"
+            icon: {
+                const wifiLevels = [
+                          "signal_wifi_0_bar",
+                          "network_wifi_1_bar",
+                          "network_wifi_2_bar",
+                          "network_wifi_3_bar",
+                          "signal_wifi_4_bar",
+                      ]
+
+                let iconId = (Math.floor(network.signalStrength*wifiLevels.length))
+                if (iconId == wifiLevels.length) {
+                    iconId--
+                }
+
+                return wifiLevels[iconId]
+
+            }
+
 
             onTriggered: {
                 if (network)

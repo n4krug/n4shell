@@ -33,4 +33,17 @@ MenuPage {
             BluetoothPage {}
         }
     }
+
+    MenuRow {
+        kind: "submenu"
+        title: "System"
+        icon: "settings_power"
+        page: systemPage
+
+        Component {
+            id: systemPage
+
+            SystemPage {}
+        }
+    }
 }

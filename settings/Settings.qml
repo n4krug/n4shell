@@ -13,19 +13,27 @@ Container {
     id: root
 
     property bool show: false
-    boxHeight: show ? 384 : 0
-    boxWidth: show ? 512 : 0
+    boxHeight: show ? 512 : 0
+    boxWidth: show ? 256*1.5 : 0
 
     readonly property bool windowActive: Window.active
     property bool dismissalArmed: false
+    property var pendingPath: []
 
     GlobalShortcut {
         appid: "n4shell"
         name: "settings"
         onPressed: {
             if (Hyprland.focusedMonitor !== root.exclusiveMonitor) return
-            root.show = !root.show
+            if (root.show)
+                root.show = false
+            else
+                root.openPath([])
         }
+    }
+
+    PageShortcuts {
+        target: root
     }
 
     Component.onCompleted: {
@@ -38,12 +46,12 @@ Container {
 
     onShowChanged: {
         if (show) {
-            stack.clear(StackView.Immediate)
-            stack.push(pagePane, { rows: Pages.rows, title: Pages.title }, StackView.Immediate)
-            Qt.callLater(() => root.focusCurrent())
+            root.applyPath(root.pendingPath)
+            root.pendingPath = []
             CenterMenu.hideOthers(root)
         } else {
             stack.clear(StackView.Immediate)
+            root.pendingPath = []
         }
 
         root.dismissalArmed = false
@@ -66,6 +74,57 @@ Container {
     function focusCurrent() {
         if (stack.currentItem)
             stack.currentItem.requestFocus()
+    }
+
+    function openPath(path) {
+        if (root.show) {
+            root.applyPath(path)
+            return
+        }
+
+        root.pendingPath = path
+        root.show = true
+    }
+
+    function applyPath(path) {
+        root.pushRoot()
+
+        const steps = path ? path : []
+
+        for (let i = 0; i < steps.length; i++) {
+            const pane = stack.currentItem
+            const row = pane ? root.findRow(pane.visibleRows, steps[i]) : null
+
+            if (!row || !row.page)
+                break
+
+            root.pushPage(row.page)
+        }
+
+        Qt.callLater(() => root.focusCurrent())
+    }
+
+    function findRow(rows, step) {
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i]
+
+            if (!row)
+                continue
+
+            if ((row.rowId && row.rowId === step) || row.title === step)
+                return row
+        }
+
+        return null
+    }
+
+    function pushRoot() {
+        stack.clear(StackView.Immediate)
+        stack.push(pagePane, { rows: Pages.rows, title: Pages.title }, StackView.Immediate)
+    }
+
+    function pushPage(component) {
+        stack.push(pagePane, { pageComponent: component }, StackView.Immediate)
     }
 
     function goBack() {
@@ -98,7 +157,7 @@ Container {
             onBackRequested: root.goBack()
 
             onSubmenuRequested: page => {
-                stack.push(pagePane, { pageComponent: page })
+                root.pushPage(page)
                 Qt.callLater(() => root.focusCurrent())
             }
 

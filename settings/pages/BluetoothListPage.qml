@@ -12,6 +12,7 @@ Item {
 
     property var entries: []
 
+    property bool preview: false
     property var adapter: null
 
     readonly property var devices: {
@@ -29,14 +30,14 @@ Item {
     onDevicesChanged: root.rebuild()
 
     Component.onCompleted: {
-        if (root.adapter)
+        if (root.adapter && !root.preview)
             root.adapter.discovering = true
 
         root.rebuild()
     }
 
     Component.onDestruction: {
-        if (root.adapter)
+        if (root.adapter && !root.preview)
             root.adapter.discovering = false
     }
 
