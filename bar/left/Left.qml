@@ -87,7 +87,7 @@ Container {
     Rectangle {
         id: focusIndicator
 
-        property int oldId: 0
+        property int oldIndex: 0
         readonly property real targetWidth: Colors.barHeight - workspaces.anchors.leftMargin
 
         property real animatedLeft: 0
@@ -108,25 +108,29 @@ Container {
 
         radius: 4
 
-        property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
+        // property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
 
-        onFocusedWorkspaceChanged: {
-            move()
-        }
+        // onFocusedWorkspaceChanged: {
+        //     move()
+        // }
 
+        readonly property var numberedWorkspaces: WorkspaceManager.getAllNumberedWorkspaces()
+        readonly property int focusIndex: numberedWorkspaces.findIndex(w => w.focused)
+        onNumberedWorkspacesChanged: move()
+        onFocusIndexChanged: move()
         function slotX(index) {
             return index * (targetWidth + workspaces.spacing)
         }
 
         function move() {
-            const id = WorkspaceManager.getAllNumberedWorkspaces().findIndex(workspace => workspace.focused)
-            const left = slotX(id)
+            const index = focusIndex
+            const left = slotX(index)
             const right = left + targetWidth
 
-            if (id > oldId) { // moving right
+            if (index > oldIndex) { // moving right
                 rightDuration = fast
                 leftDuration = slow
-            } else if (id < oldId) { // moving left
+            } else if (index < oldIndex) { // moving left
                 rightDuration = slow
                 leftDuration = fast
             }
@@ -134,7 +138,7 @@ Container {
             animatedLeft = left
             animatedRight = right
 
-            oldId = id
+            oldIndex = index
         }
 
         Component.onCompleted: {
