@@ -19,16 +19,6 @@ MenuPage {
         command: ["loginctl", "lock-session"]
     }
 
-    // MenuRow {
-    //     id: logout
-
-    //     kind: "action"
-
-    //     title: "Logout"
-    //     icon: "logout"
-    //     command: ["logout"]
-    // }
-
     MenuRow {
         id: sleep
 
@@ -46,7 +36,7 @@ MenuPage {
 
         title: "Restart"
         icon: "restart_alt"
-        command: ["systemctl", "restart"]
+        command: ["loginctl", "reboot"]
     }
 
     MenuRow {

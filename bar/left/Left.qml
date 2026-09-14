@@ -108,12 +108,6 @@ Container {
 
         radius: 4
 
-        // property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
-
-        // onFocusedWorkspaceChanged: {
-        //     move()
-        // }
-
         readonly property var numberedWorkspaces: WorkspaceManager.getAllNumberedWorkspaces()
         readonly property int focusIndex: numberedWorkspaces.findIndex(w => w.focused)
         onNumberedWorkspacesChanged: move()
