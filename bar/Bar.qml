@@ -11,6 +11,7 @@ import "../drawing"
 import "../Colors.js" as Colors
 import "../services"
 import "../settings"
+import "."
 
 Scope {
     Variants {
@@ -107,6 +108,10 @@ Scope {
                                 exclusiveMonitor: win.monitor
                             }
                         }
+                    }
+
+                    VolumePopup {
+                        exclusiveMonitor: win.monitor
                     }
 
                     Launcher {
