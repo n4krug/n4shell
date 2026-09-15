@@ -20,6 +20,16 @@ MenuPage {
     }
 
     MenuRow {
+        id: logout
+
+        kind: "action"
+
+        title: "Logout"
+        icon: "logout"
+        command: ["loginctl", "terminate-session", "$XDG_SESSION_ID"]
+    }
+
+    MenuRow {
         id: sleep
 
         kind: "action"
