@@ -17,7 +17,7 @@ Item {
 	Image {
 		id: bg
 
-		source: "file://" + Quickshell.env("HOME") + "/.config/omarchy/current/background"
+		source: "file://" + Quickshell.env("HOME") + "/.config/themes/current/bg.jpg"
 		anchors.fill: parent
 		anchors.margins: -64
 
