@@ -23,6 +23,10 @@ Item {
     readonly property string pageTitle: root.page ? root.page.title : root.title
     readonly property bool inputFocused: input.activeFocus
 
+    readonly property bool passwordMode: root.page ? root.page.passwordMode === true : false
+
+    property bool passwordVisible: false
+
     property string query: ""
 
     signal backRequested()
@@ -33,8 +37,40 @@ Item {
         root.page = root.pageComponent ? root.pageComponent.createObject(root) : null
     }
 
+    Connections {
+        target: root.page
+        ignoreUnknownSignals: true
+
+        function onSubmitted() {
+            root.backRequested()
+        }
+
+        function onPageRequested(component) {
+            if (component)
+                root.submenuRequested(component)
+        }
+    }
+
+    onPasswordModeChanged: {
+        passwordInput.text = ""
+        root.passwordVisible = false
+
+        if (root.passwordMode)
+            Qt.callLater(() => passwordInput.forceActiveFocus())
+    }
+
     function requestFocus() {
-        input.forceActiveFocus()
+        if (root.passwordMode)
+            passwordInput.forceActiveFocus()
+        else
+            input.forceActiveFocus()
+    }
+
+    function submitPassword() {
+        if (!root.passwordMode || !root.page)
+            return
+
+        root.page.submitPassword()
     }
 
     function toArray(source) {
@@ -90,7 +126,7 @@ Item {
     ScriptModel {
         id: filtered
         values: {
-            const q = root.query.trim().toLowerCase()
+            const q = root.passwordMode ? "" : root.query.trim().toLowerCase()
 
             if (q === "")
                 return root.visibleRows
@@ -135,9 +171,68 @@ Item {
             }
         }
 
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+            visible: root.passwordMode
+
+            TextField {
+                id: passwordInput
+                Layout.fillWidth: true
+                placeholderText: "Password..."
+                echoMode: root.passwordVisible ? TextInput.Normal : TextInput.Password
+                inputMethodHints: Qt.ImhSensitiveData
+                padding: 12
+                color: Colors.text
+                placeholderTextColor: Colors.text
+                font.pixelSize: 16
+                background: Rectangle {
+                    color: Colors.highlight
+                    border.width: 0
+                    opacity: 0.15
+                    radius: Colors.radius
+                }
+
+                onTextChanged: {
+                    if (root.page && root.page.passwordMode)
+                        root.page.password = passwordInput.text
+                }
+
+                Keys.onEscapePressed: root.backRequested()
+
+                Keys.onPressed: event => {
+                    if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key)) {
+                        event.accepted = true;
+                        root.submitPassword();
+                    }
+                }
+            }
+
+            Text {
+                text: root.passwordVisible ? "visibility_off" : "visibility"
+                color: Colors.text
+                font.family: "Material Symbols Rounded"
+                font.pixelSize: 20
+                font.variableAxes: {
+                    "FILL": 0,
+                    "wght": 400,
+                    "GRAD": 0,
+                    "opsz": 20
+                }
+
+                TapHandler {
+                    onTapped: {
+                        root.passwordVisible = !root.passwordVisible
+                        passwordInput.forceActiveFocus()
+                    }
+                }
+            }
+        }
+
         TextField {
             id: input
             Layout.fillWidth: true
+            visible: !root.passwordMode
             placeholderText: "Search..."
             padding: 12
             color: Colors.text

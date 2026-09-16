@@ -13,6 +13,15 @@ Item {
     property bool preview: false
     property var device: null
 
+    // ssids we tried to connect to and failed, kept here because rows are
+    // recreated on every scan.
+    property var failed: []
+
+    // network the password step is being shown for.
+    property var pendingNetwork: null
+
+    signal pageRequested(var component)
+
     readonly property var networks: {
         if (!root.device)
             return []
@@ -34,6 +43,49 @@ Item {
             root.device.scannerEnabled = false
     }
 
+    // enterprise networks need more than a psk, so they keep the old behavior.
+    readonly property var pskSecurityTypes: [
+        WifiSecurityType.Wpa3SuiteB192,
+        WifiSecurityType.Sae,
+        WifiSecurityType.Wpa2Psk,
+        WifiSecurityType.WpaPsk,
+        WifiSecurityType.StaticWep,
+        WifiSecurityType.DynamicWep,
+        WifiSecurityType.Leap,
+    ]
+
+    function needsPassword(network) {
+        if (!network || network.known)
+            return false
+
+        return root.pskSecurityTypes.includes(network.security)
+    }
+
+    function openPasswordPrompt(network) {
+        root.pendingNetwork = network
+        root.pageRequested(passwordPage)
+    }
+
+    function markFailed(network) {
+        if (!network || network.connected)
+            return
+
+        const name = network.name || ""
+
+        if (name !== "" && root.failed.indexOf(name) === -1)
+            root.failed = root.failed.concat(name)
+    }
+
+    function clearFailed(network) {
+        if (!network)
+            return
+
+        const name = network.name || ""
+
+        if (root.failed.indexOf(name) !== -1)
+            root.failed = root.failed.filter(candidate => candidate !== name)
+    }
+
     function setRows(next) {
         root.rows.forEach(row => row.destroy())
         root.rows = next
@@ -46,9 +98,19 @@ Item {
     }
 
     Component {
+        id: passwordPage
+
+        WifiPasswordPage {
+            network: root.pendingNetwork
+        }
+    }
+
+    Component {
         id: networkRow
 
         MenuRow {
+            id: row
+
             kind: "action"
 
             property var network: null
@@ -57,6 +119,9 @@ Item {
             subtitle: {
                 if (!network)
                     return ""
+
+                if (root.failed.includes(network.name || ""))
+                    return "couldn't connect · tap to retry"
 
                 const parts = [Math.round(network.signalStrength * 100) + "%"]
 
@@ -97,8 +162,28 @@ Item {
 
 
             onTriggered: {
-                if (network)
+                if (!network)
+                    return
+
+                if (root.needsPassword(network)) {
+                    root.openPasswordPrompt(network)
+                } else {
                     network.connect()
+                }
+            }
+
+            Connections {
+                target: row.network
+                ignoreUnknownSignals: true
+
+                function onConnectionFailed(reason) {
+                    root.markFailed(row.network)
+                }
+
+                function onConnectedChanged() {
+                    if (row.network && row.network.connected)
+                        root.clearFailed(row.network)
+                }
             }
         }
     }
