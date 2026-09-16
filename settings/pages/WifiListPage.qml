@@ -76,12 +76,21 @@ Item {
                           "network_wifi_3_bar",
                           "signal_wifi_4_bar",
                       ]
+                const lockedLevels = [
+                    "wifi_lock",
+                    "network_wifi_1_bar_locked",
+                    "network_wifi_2_bar_locked",
+                    "network_wifi_3_bar_locked",
+                    "network_wifi_locked"
+                ]
 
                 let iconId = (Math.floor(network.signalStrength*wifiLevels.length))
                 if (iconId == wifiLevels.length) {
                     iconId--
                 }
 
+                if (network.security !== WifiSecurityType.Open)
+                    return lockedLevels[iconId]
                 return wifiLevels[iconId]
 
             }
