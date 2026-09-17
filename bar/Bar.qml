@@ -77,6 +77,10 @@ Scope {
                     }
 
                     Region {
+                        item: updater
+                    }
+
+                    Region {
                         item: installPill
                     }
                 }
@@ -145,10 +149,19 @@ Scope {
                         anchors.centerIn: parent
                     }
 
+                    Updater {
+                        id: updater
+                        objectName: "updater"
+
+                        exclusiveMonitor: win.monitor
+                        anchors.centerIn: parent
+                    }
+
                     InstallerIndicator {
                         id: installPill
 
                         installer: installer
+                        updater: updater
                         exclusiveMonitor: win.monitor
                     }
                     

@@ -33,7 +33,7 @@ Item {
             id: icons
 
             anchors.right: parent.right
-            anchors.rightMargin: root.margin*2
+            anchors.rightMargin: root.margin*1.5
             // anchors.verticalCenter: parent.verticalCenter
             anchors.top: parent.top
             anchors.topMargin: root.margin/2
@@ -151,6 +151,60 @@ Item {
                             }
 
                         }
+                    }
+                }
+            }
+
+            Container {
+                id: updates
+
+                boxWidth: root.iconSize
+                boxHeight: root.iconSize
+                exclusiveMonitor: root.exclusiveMonitor
+
+                visible: UpdateManager.updatesAvailable
+
+                GlobalShortcut {
+                    appid: "n4shell"
+                    name: "check-updates"
+                    onPressed: UpdateManager.refreshCount()
+                }
+
+                Text {
+                    text: "update"
+                    color: Colors.text
+                    font.pixelSize: root.iconSize
+                    anchors.centerIn: parent
+                    font.family: "Material Symbols Rounded" // Or Material Icons
+                    font.variableAxes: {
+                        "FILL": 0,
+                        "wght": 600,
+                        "GRAD": 0,
+                        "opsz": root.iconSize
+                    }
+                }
+
+                TapHandler {
+                    onTapped: CenterMenu.openMenu("updater", root.exclusiveMonitor)
+                }
+
+                Container {
+                    visible: updates.hover.hovered
+
+                    exclusiveMonitor: root.exclusiveMonitor
+                    anchors {
+                        top: parent.bottom
+                        topMargin: 12
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    boxWidth: updateTooltip.width + root.iconSize*2
+
+                    Text {
+                        id: updateTooltip
+                        color: Colors.text
+                        anchors.centerIn: parent
+
+                        text: UpdateManager.updateCount
                     }
                 }
             }

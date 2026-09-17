@@ -9,10 +9,16 @@ Container {
   id: root
 
   property var installer: null
+  property var updater: null
 
-  readonly property bool shown: PackageManager.active && !(root.installer && root.installer.show)
+  readonly property var target: UpdateManager.active ? UpdateManager : PackageManager
+  readonly property bool updating: root.target === UpdateManager
+  readonly property bool shown: (PackageManager.active || UpdateManager.active)
+    && !(root.installer && root.installer.show)
+    && !(root.updater && root.updater.show)
+
   readonly property color accent: {
-    switch (PackageManager.status) {
+    switch (root.target.status) {
       case "done": return Colors.green
       case "failed": return Colors.negative
       case "cancelled": return Colors.negative
@@ -20,19 +26,20 @@ Container {
     }
   }
   readonly property string icon: {
-    switch (PackageManager.status) {
+    switch (root.target.status) {
       case "checking": return "hourglass_empty"
       case "auth": return "lock"
       case "installing": return "download"
+      case "updating": return "upgrade"
       case "done": return "check"
       case "failed": return "error"
       case "cancelled": return "block"
-      default: return "download"
+      default: return root.updating ? "upgrade" : "download"
     }
   }
-  readonly property string detail: PackageManager.busy ? PackageManager.lastLogLine : PackageManager.currentPackage
-  readonly property string percent: PackageManager.busy && PackageManager.progress >= 0
-    ? Math.round(PackageManager.progress * 100) + "%"
+  readonly property string detail: root.target.busy ? root.target.lastLogLine : root.target.currentPackage
+  readonly property string percent: root.target.busy && root.target.progress >= 0
+    ? Math.round(root.target.progress * 100) + "%"
     : ""
 
   boxWidth: root.shown ? 240 : 0
@@ -48,9 +55,13 @@ Container {
     rightMargin: 8
   }
 
-  function openInstaller() {
-    if (root.installer)
+  function openTarget() {
+    if (root.updating) {
+      if (root.updater)
+        root.updater.show = true
+    } else if (root.installer) {
       root.installer.show = true
+    }
   }
 
   MouseArea {
@@ -62,14 +73,14 @@ Container {
 
     onClicked: mouse => {
       if (mouse.button === Qt.RightButton) {
-        if (PackageManager.busy)
-          PackageManager.cancel()
+        if (root.target.busy)
+          root.target.cancel()
         else
-          PackageManager.dismiss()
+          root.target.dismiss()
         return
       }
 
-      root.openInstaller()
+      root.openTarget()
     }
   }
 
@@ -108,7 +119,7 @@ Container {
       spacing: 0
 
       Text {
-        text: PackageManager.statusLabel + " " + PackageManager.currentPackage + (root.percent !== "" ? "  " + root.percent : "")
+        text: root.target.statusLabel + " " + root.target.currentPackage + (root.percent !== "" ? "  " + root.percent : "")
         color: Colors.text
         font.pixelSize: 13
         font.bold: true
@@ -143,10 +154,10 @@ Container {
 
       TapHandler {
         onTapped: {
-          if (PackageManager.busy)
-            PackageManager.cancel()
+          if (root.target.busy)
+            root.target.cancel()
           else
-            PackageManager.dismiss()
+            root.target.dismiss()
         }
       }
     }
@@ -165,7 +176,7 @@ Container {
     radius: 2
     color: Colors.highlight
     opacity: 0.15
-    visible: PackageManager.busy
+    visible: root.target.busy
 
     Rectangle {
       anchors {
@@ -173,12 +184,12 @@ Container {
         top: parent.top
         bottom: parent.bottom
       }
-      width: PackageManager.progress >= 0 ? parent.width * PackageManager.progress : parent.width
+      width: root.target.progress >= 0 ? parent.width * root.target.progress : parent.width
       radius: 2
       color: root.accent
 
       NumberAnimation on opacity {
-        running: PackageManager.progress < 0
+        running: root.target.progress < 0
         from: 0.3
         to: 1
         duration: 700

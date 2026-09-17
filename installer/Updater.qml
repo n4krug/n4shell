@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Widgets
 
 import "../bar/components"
 import "../services"
@@ -15,55 +16,51 @@ Container {
   id: root
 
   property bool show: false
+  property string query: ""
 
   focus: true
 
   boxHeight: show ? 256 * 2 : 0
   boxWidth: show ? 640 : 0
 
-  readonly property bool logVisible: PackageManager.active && !PackageManager.needsPassword
+  readonly property bool logVisible: UpdateManager.active && !UpdateManager.needsPassword
 
   readonly property bool windowActive: Window.active
   property bool dismissalArmed: false
 
   function currentEntry() {
-    const results = PackageManager.results
+    const values = filtered.values
 
-    if (list.currentIndex >= 0 && list.currentIndex < results.length)
-      return results[list.currentIndex]
+    if (list.currentIndex >= 0 && list.currentIndex < values.length)
+      return values[list.currentIndex]
 
     return null
   }
 
-  function installCurrent() {
+  function toggleCurrent() {
     const entry = root.currentEntry()
 
-    if (!entry || PackageManager.busy)
+    if (!entry)
       return
 
-    PackageManager.install(entry)
+    UpdateManager.toggle(entry.name)
   }
 
-  function chipLabel(value) {
-    if (value === "repo")
-      return "Repo"
-    if (value === "aur")
-      return "AUR"
-
-    return "All"
+  function updateSelected() {
+    UpdateManager.updateSelected()
   }
 
   function submitPassword() {
     if (passwordField.text === "")
       return
 
-    PackageManager.submitPassword(passwordField.text)
+    UpdateManager.submitPassword(passwordField.text)
     passwordField.text = ""
   }
 
   GlobalShortcut {
     appid: "n4shell"
-    name: "installer"
+    name: "updater"
     onPressed: {
       if (Hyprland.focusedMonitor !== root.exclusiveMonitor) return
       if (root.show)
@@ -103,10 +100,12 @@ Container {
 
   onShowChanged: {
     if (show) {
+      UpdateManager.refresh()
       Qt.callLater(() => input.forceActiveFocus())
       CenterMenu.hideOthers(root)
     } else {
       passwordField.text = ""
+      input.text = ""
       input.focus = false
     }
 
@@ -122,6 +121,19 @@ Container {
     onTriggered: root.dismissalArmed = root.windowActive
   }
 
+  ScriptModel {
+    id: filtered
+
+    values: {
+      const q = root.query.trim().toLowerCase()
+
+      if (q === "")
+        return UpdateManager.pending
+
+      return UpdateManager.pending.filter(entry => entry.name.toLowerCase().includes(q))
+    }
+  }
+
   ColumnLayout {
     anchors.fill: parent
     anchors.margins: 16
@@ -133,14 +145,16 @@ Container {
       spacing: 8
 
       Text {
-        text: "Install"
+        text: "Update"
         color: Colors.text
         font.bold: true
         font.pixelSize: 16
       }
 
       Text {
-        text: PackageManager.searching ? "searching..." : PackageManager.results.length + " results"
+        text: UpdateManager.refreshing
+          ? "checking..."
+          : UpdateManager.selectedCount + " / " + UpdateManager.pendingCount + " selected"
         color: Colors.text
         opacity: 0.5
         font.pixelSize: 13
@@ -150,10 +164,38 @@ Container {
         Layout.fillWidth: true
       }
 
+      RowLayout {
+        spacing: 6
+
+        Repeater {
+          model: ["all", "none"]
+
+          delegate: Text {
+            id: chip
+
+            required property var modelData
+
+            text: chip.modelData === "all" ? "All" : "None"
+            color: Colors.text
+            opacity: 0.4
+            font.pixelSize: 13
+
+            TapHandler {
+              onTapped: {
+                if (chip.modelData === "all")
+                  UpdateManager.selectAll()
+                else
+                  UpdateManager.selectNone()
+              }
+            }
+          }
+        }
+      }
+
       Text {
-        text: "upgrade"
+        text: "refresh"
         color: Colors.text
-        opacity: 0.7
+        opacity: UpdateManager.refreshing ? 0.3 : 0.7
         font.family: "Material Symbols Rounded"
         font.pixelSize: 18
         font.variableAxes: {
@@ -164,34 +206,7 @@ Container {
         }
 
         TapHandler {
-          onTapped: {
-            root.show = false
-            CenterMenu.openMenu("updater", root.exclusiveMonitor)
-          }
-        }
-      }
-
-      RowLayout {
-        spacing: 6
-
-        Repeater {
-          model: ["all", "repo", "aur"]
-
-          delegate: Text {
-            id: chip
-
-            required property var modelData
-
-            text: root.chipLabel(modelData)
-            color: Colors.text
-            opacity: PackageManager.source === modelData ? 1 : 0.4
-            font.pixelSize: 13
-            font.bold: PackageManager.source === modelData
-
-            TapHandler {
-              onTapped: PackageManager.source = chip.modelData
-            }
-          }
+          onTapped: UpdateManager.refresh()
         }
       }
     }
@@ -199,7 +214,7 @@ Container {
     TextField {
       id: input
       Layout.fillWidth: true
-      placeholderText: "Search packages..."
+      placeholderText: "Filter updates..."
       padding: 12
       color: Colors.text
       placeholderTextColor: Colors.text
@@ -212,8 +227,8 @@ Container {
       }
 
       onTextChanged: {
-        PackageManager.query = text
-        list.currentIndex = PackageManager.results.length > 0 ? 0 : -1
+        root.query = text
+        list.currentIndex = filtered.values.length > 0 ? 0 : -1
       }
 
       Keys.onEscapePressed: {
@@ -231,9 +246,15 @@ Container {
           event.accepted = true;
           if (list.currentIndex < list.count - 1)
             list.currentIndex++;
-        } else if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key)) {
+        } else if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key) && !ctrl) {
           event.accepted = true;
-          root.installCurrent();
+          root.toggleCurrent();
+        } else if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key) && ctrl) {
+          event.accepted = true;
+          root.updateSelected();
+        } else if (event.key === Qt.Key_Space) {
+          event.accepted = true;
+          root.toggleCurrent();
         } else if (event.key === Qt.Key_Q && ctrl) {
           event.accepted = true;
           root.show = false
@@ -249,8 +270,8 @@ Container {
       clip: true
       spacing: 4
 
-      model: PackageManager.results
-      currentIndex: PackageManager.results.length > 0 ? 0 : -1
+      model: filtered.values
+      currentIndex: filtered.values.length > 0 ? 0 : -1
       keyNavigationWraps: true
       preferredHighlightBegin: 0
       preferredHighlightEnd: height
@@ -263,18 +284,53 @@ Container {
         color: Colors.highlight
       }
 
-      delegate: PackageRow {
+      delegate: UpdateRow {
         selected: ListView.isCurrentItem
+        checked: UpdateManager.isSelected(modelData.name)
 
         onPicked: list.currentIndex = index
-        onInstallRequested: PackageManager.install(modelData)
+        onToggled: UpdateManager.toggle(modelData.name)
+      }
+    }
+
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: 8
+      visible: !UpdateManager.active
+
+      Text {
+        text: UpdateManager.selectedCount === 0
+          ? "nothing selected"
+          : "update " + UpdateManager.selectedCount + " package" + (UpdateManager.selectedCount === 1 ? "" : "s")
+        color: Colors.text
+        font.pixelSize: 14
+        elide: Text.ElideRight
+        Layout.fillWidth: true
+      }
+
+      Text {
+        text: "arrow_forward"
+        color: Colors.text
+        opacity: UpdateManager.selectedCount === 0 ? 0.3 : 1
+        font.family: "Material Symbols Rounded"
+        font.pixelSize: 20
+        font.variableAxes: {
+          "FILL": 0,
+          "wght": 600,
+          "GRAD": 0,
+          "opsz": 20
+        }
+
+        TapHandler {
+          onTapped: root.updateSelected()
+        }
       }
     }
 
     ColumnLayout {
       Layout.fillWidth: true
       spacing: 6
-      visible: PackageManager.needsPassword
+      visible: UpdateManager.needsPassword
 
       onVisibleChanged: {
         if (visible)
@@ -282,7 +338,7 @@ Container {
       }
 
       Text {
-        text: "sudo password for " + PackageManager.currentPackage
+        text: "sudo password for " + UpdateManager.currentPackage
         color: Colors.text
         font.pixelSize: 13
         opacity: 0.7
@@ -334,7 +390,7 @@ Container {
       }
 
       Text {
-        text: PackageManager.error
+        text: UpdateManager.error
         visible: text !== ""
         color: Colors.negative
         font.pixelSize: 13
@@ -352,14 +408,14 @@ Container {
         spacing: 8
 
         Text {
-          text: PackageManager.statusLabel
+          text: UpdateManager.statusLabel
           color: Colors.text
           font.bold: true
           font.pixelSize: 14
         }
 
         Text {
-          text: PackageManager.currentPackage
+          text: UpdateManager.currentPackage
           color: Colors.text
           font.pixelSize: 14
           elide: Text.ElideRight
@@ -367,16 +423,8 @@ Container {
         }
 
         Text {
-          text: PackageManager.queuedCount > 1 ? "+" + (PackageManager.queuedCount - 1) + " queued" : ""
-          visible: text !== ""
-          color: Colors.text
-          opacity: 0.5
-          font.pixelSize: 12
-        }
-
-        Text {
           text: "close"
-          visible: PackageManager.busy
+          visible: UpdateManager.busy
           color: Colors.text
           font.family: "Material Symbols Rounded"
           font.pixelSize: 18
@@ -388,7 +436,7 @@ Container {
           }
 
           TapHandler {
-            onTapped: PackageManager.cancel()
+            onTapped: UpdateManager.cancel()
           }
         }
       }
@@ -406,12 +454,12 @@ Container {
             top: parent.top
             bottom: parent.bottom
           }
-          width: PackageManager.progress >= 0 ? parent.width * PackageManager.progress : parent.width
+          width: UpdateManager.progress >= 0 ? parent.width * UpdateManager.progress : parent.width
           radius: 2
-          color: PackageManager.status === "done" ? Colors.green : Colors.highlight
+          color: UpdateManager.status === "done" ? Colors.green : Colors.highlight
 
           NumberAnimation on opacity {
-            running: PackageManager.progress < 0 && PackageManager.busy
+            running: UpdateManager.progress < 0 && UpdateManager.busy
             from: 0.3
             to: 1
             duration: 700
@@ -434,7 +482,7 @@ Container {
         Text {
           id: logText
           width: parent.width
-          text: PackageManager.log.slice(-120).join("\n")
+          text: UpdateManager.log.slice(-120).join("\n")
           color: Colors.text
           opacity: 0.8
           font.family: "Monospace"
@@ -446,7 +494,7 @@ Container {
       RowLayout {
         Layout.fillWidth: true
         spacing: 8
-        visible: PackageManager.lockedDb
+        visible: UpdateManager.lockedDb
 
         Text {
           text: "pacman is locked, clear /var/lib/pacman/db.lck?"
@@ -469,7 +517,7 @@ Container {
           }
 
           TapHandler {
-            onTapped: PackageManager.clearLock()
+            onTapped: UpdateManager.clearLock()
           }
         }
       }
@@ -477,8 +525,8 @@ Container {
 
     Text {
       Layout.fillWidth: true
-      visible: !PackageManager.active
-      text: "enter install · esc hide"
+      visible: !UpdateManager.active
+      text: "enter toggle · ctrl+enter update · esc hide"
       color: Colors.text
       opacity: 0.4
       font.pixelSize: 12

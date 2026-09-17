@@ -58,4 +58,16 @@ MenuPage {
         icon: "download"
         onTriggered: CenterMenu.openMenu("installer", Hyprland.focusedMonitor)
     }
+
+    MenuRow {
+        kind: "action"
+        title: "Update"
+        subtitle: UpdateManager.busy
+            ? UpdateManager.statusLabel + " " + UpdateManager.currentPackage
+            : UpdateManager.pendingCount > 0
+                ? UpdateManager.pendingCount + " updates available"
+                : "Up to date"
+        icon: "upgrade"
+        onTriggered: CenterMenu.openMenu("updater", Hyprland.focusedMonitor)
+    }
 }
