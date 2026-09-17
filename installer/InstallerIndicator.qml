@@ -108,7 +108,7 @@ Container {
       spacing: 0
 
       Text {
-        text: PackageManager.statusLabel + (root.percent !== "" ? "  " + root.percent : "")
+        text: PackageManager.statusLabel + " " + PackageManager.currentPackage + (root.percent !== "" ? "  " + root.percent : "")
         color: Colors.text
         font.pixelSize: 13
         font.bold: true
