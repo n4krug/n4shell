@@ -11,6 +11,7 @@ import "../drawing"
 import "../Colors.js" as Colors
 import "../services"
 import "../settings"
+import "../installer"
 import "."
 
 Scope {
@@ -70,6 +71,14 @@ Scope {
                     Region {
                         item: settings
                     }
+
+                    Region {
+                        item: installer
+                    }
+
+                    Region {
+                        item: installPill
+                    }
                 }
 
                 Item {
@@ -126,6 +135,21 @@ Scope {
 
                         exclusiveMonitor: win.monitor
                         anchors.centerIn: parent
+                    }
+
+                    Installer {
+                        id: installer
+                        objectName: "installer"
+
+                        exclusiveMonitor: win.monitor
+                        anchors.centerIn: parent
+                    }
+
+                    InstallerIndicator {
+                        id: installPill
+
+                        installer: installer
+                        exclusiveMonitor: win.monitor
                     }
                     
                     Row {

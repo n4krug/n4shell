@@ -27,4 +27,19 @@ QtObject {
     function refresh() {
         anyShown = items.some(item => item.show)
     }
+
+    function menuByName(name, monitor) {
+        return items.find(item => item.objectName === name
+            && (
+                monitor === undefined 
+                || monitor === null 
+                || item.exclusiveMonitor === monitor
+                ))
+    }
+
+    function openMenu(name, monitor) {
+        const menu = menuByName(name, monitor)
+        if (menu) menu.show = true
+        return menu
+    }
 }

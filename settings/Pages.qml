@@ -1,7 +1,9 @@
 pragma Singleton
 import QtQuick
+import Quickshell.Hyprland
 
 import "pages"
+import "../services"
 
 MenuPage {
     id: root
@@ -45,5 +47,15 @@ MenuPage {
 
             SystemPage {}
         }
+    }
+
+    MenuRow {
+        kind: "action"
+        title: "Install"
+        subtitle: PackageManager.busy
+            ? PackageManager.statusLabel + " " + PackageManager.currentPackage
+            : ""
+        icon: "download"
+        onTriggered: CenterMenu.openMenu("installer", Hyprland.focusedMonitor)
     }
 }
