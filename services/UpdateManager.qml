@@ -148,8 +148,6 @@ Singleton {
 
     root.selected = next
     root.refreshing = false
-
-    root.refreshCount()
   }
 
   function isSelected(name) {
@@ -304,6 +302,7 @@ Singleton {
     }
 
     finishTimer.restart()
+    UpdateManager.refreshCount()
   }
 
   function appendLog(line) {

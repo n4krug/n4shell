@@ -258,6 +258,8 @@ Container {
         } else if (event.key === Qt.Key_Q && ctrl) {
           event.accepted = true;
           root.show = false
+        } else if (event.key === Qt.Key_A && ctrl) {
+          UpdateManager.selectAll()
         }
       }
     }
