@@ -10,12 +10,16 @@ Container {
 
   property var installer: null
   property var updater: null
+  property var uninstaller: null
 
-  readonly property var target: UpdateManager.active ? UpdateManager : PackageManager
+  readonly property var target: UpdateManager.active
+    ? UpdateManager
+    : UninstallManager.active ? UninstallManager : PackageManager
   readonly property bool updating: root.target === UpdateManager
-  readonly property bool shown: (PackageManager.active || UpdateManager.active)
+  readonly property bool shown: (PackageManager.active || UpdateManager.active || UninstallManager.active)
     && !(root.installer && root.installer.show)
     && !(root.updater && root.updater.show)
+    && !(root.uninstaller && root.uninstaller.show)
 
   readonly property color accent: {
     switch (root.target.status) {
@@ -31,10 +35,11 @@ Container {
       case "auth": return "lock"
       case "installing": return "download"
       case "updating": return "upgrade"
+      case "removing": return "delete"
       case "done": return "check"
       case "failed": return "error"
       case "cancelled": return "block"
-      default: return root.updating ? "upgrade" : "download"
+      default: return root.updating ? "upgrade" : root.target === UninstallManager ? "delete" : "download"
     }
   }
   readonly property string detail: root.target.busy ? root.target.lastLogLine : root.target.currentPackage
@@ -59,6 +64,9 @@ Container {
     if (root.updating) {
       if (root.updater)
         root.updater.show = true
+    } else if (root.target === UninstallManager) {
+      if (root.uninstaller)
+        root.uninstaller.show = true
     } else if (root.installer) {
       root.installer.show = true
     }

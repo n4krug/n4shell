@@ -10,9 +10,36 @@ Item {
   required property int index
 
   property bool selected: false
+  property bool checked: false
+  property bool checkable: false
+  property bool showMeta: false
+
+  readonly property string badgeText: {
+    if (root.modelData.source === "aur")
+      return "AUR"
+
+    return root.modelData.repo || "Repo"
+  }
+
+  readonly property string subtitleText: {
+    if (root.modelData.from !== undefined)
+      return root.modelData.from + " → " + root.modelData.to
+
+    return root.modelData.description || ""
+  }
+
+  readonly property string metaNote: {
+    if (root.modelData.votes !== undefined && root.modelData.votes > 0)
+      return root.modelData.votes + "★"
+
+    if (root.modelData.size !== undefined)
+      return root.modelData.size
+
+    return ""
+  }
 
   signal picked()
-  signal installRequested()
+  signal toggled()
 
   width: ListView.view ? ListView.view.width : 0
   height: 56
@@ -35,6 +62,26 @@ Item {
     anchors.margins: 8
     spacing: 12
 
+    Text {
+      visible: root.checkable
+      text: root.checked ? "check_box" : "check_box_outline_blank"
+      color: Colors.text
+      opacity: root.checked ? 1 : 0.5
+      font.family: "Material Symbols Rounded"
+      font.pixelSize: 22
+      font.variableAxes: {
+        "FILL": root.checked ? 1 : 0,
+        "wght": 400,
+        "GRAD": 0,
+        "opsz": 22
+      }
+      Layout.alignment: Qt.AlignVCenter
+
+      TapHandler {
+        onTapped: root.toggled()
+      }
+    }
+
     Rectangle {
       Layout.preferredWidth: 56
       Layout.fillHeight: true
@@ -44,7 +91,7 @@ Item {
 
       Text {
         anchors.centerIn: parent
-        text: root.modelData.source === "aur" ? "AUR" : root.modelData.repo
+        text: root.badgeText
         color: Colors.text
         font.pixelSize: 11
         font.bold: root.modelData.source === "aur"
@@ -65,7 +112,7 @@ Item {
       }
 
       Text {
-        text: root.modelData.description
+        text: root.subtitleText
         color: Colors.text
         opacity: 0.6
         font.pixelSize: 12
@@ -76,6 +123,7 @@ Item {
     }
 
     RowLayout {
+      visible: root.showMeta
       spacing: 6
 
       Text {
@@ -110,7 +158,7 @@ Item {
         spacing: 0
 
         Text {
-          text: root.modelData.version
+          text: root.modelData.version || ""
           color: Colors.text
           opacity: 0.6
           font.pixelSize: 11
@@ -120,7 +168,7 @@ Item {
         }
 
         Text {
-          text: root.modelData.votes > 0 ? root.modelData.votes + "★" : ""
+          text: root.metaNote
           visible: text !== ""
           color: Colors.text
           opacity: 0.5
@@ -135,6 +183,6 @@ Item {
   MouseArea {
     anchors.fill: parent
     onClicked: root.picked()
-    onDoubleClicked: root.installRequested()
+    onDoubleClicked: root.toggled()
   }
 }

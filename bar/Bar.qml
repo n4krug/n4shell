@@ -81,6 +81,10 @@ Scope {
                     }
 
                     Region {
+                        item: uninstaller
+                    }
+
+                    Region {
                         item: installPill
                     }
                 }
@@ -157,11 +161,20 @@ Scope {
                         anchors.centerIn: parent
                     }
 
+                    Uninstaller {
+                        id: uninstaller
+                        objectName: "uninstaller"
+
+                        exclusiveMonitor: win.monitor
+                        anchors.centerIn: parent
+                    }
+
                     InstallerIndicator {
                         id: installPill
 
                         installer: installer
                         updater: updater
+                        uninstaller: uninstaller
                         exclusiveMonitor: win.monitor
                     }
                     

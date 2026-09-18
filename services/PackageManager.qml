@@ -18,7 +18,7 @@ Singleton {
   property string status: "idle"
   property string currentPackage: ""
   property string currentSource: "repo"
-  property var queue: []
+  property var pendingNames: []
   property var log: []
   property real progress: -1
   property string error: ""
@@ -28,11 +28,14 @@ Singleton {
 
   property string password: ""
 
+  property var selected: ({})
+
+  readonly property var entries: root.results
   readonly property bool busy: root.status === "checking" || root.status === "auth" || root.status === "installing"
   readonly property bool needsPassword: root.status === "auth"
   readonly property bool active: root.busy || finishTimer.running
   readonly property string lastLogLine: root.log.length > 0 ? root.log[root.log.length - 1] : ""
-  readonly property int queuedCount: root.queue.length
+  readonly property int selectedCount: root.results.filter(entry => root.selected[entry.name] === true).length
 
   readonly property string statusLabel: {
     switch (root.status) {
@@ -60,6 +63,38 @@ Singleton {
 
   function search() {
     debounce.restart()
+  }
+
+  function isSelected(name) {
+    return root.selected[name] === true
+  }
+
+  function toggle(name) {
+    const next = Object.assign({}, root.selected)
+    next[name] = !root.isSelected(name)
+    root.selected = next
+  }
+
+  function selectAll() {
+    const next = ({})
+
+    root.results.forEach(entry => {
+      next[entry.name] = true
+    })
+
+    root.selected = next
+  }
+
+  function selectNone() {
+    root.selected = ({})
+  }
+
+  function selectedNames() {
+    return root.results.filter(entry => root.isSelected(entry.name)).map(entry => entry.name)
+  }
+
+  function hasAurSelected() {
+    return root.results.some(entry => entry.source === "aur" && root.isSelected(entry.name))
   }
 
   function isInstalled(name) {
@@ -245,37 +280,40 @@ Singleton {
     })
 
     root.results = list.slice(0, root.maxResults)
+
+    const next = ({})
+
+    root.results.forEach(entry => {
+      next[entry.name] = root.selected[entry.name] === true
+    })
+
+    root.selected = next
     root.searching = false
   }
 
-  function install(entry) {
-    if (!entry || !entry.name)
-      return
-
-    const pkg = { name: entry.name, source: entry.source === "aur" ? "aur" : "repo" }
-
-    if (root.busy) {
-      root.queue = root.queue.concat([pkg])
-      return
-    }
-
-    root.queue = [pkg]
-    root.startNext()
-  }
-
-  function startNext() {
+  function commitSelected() {
     if (root.busy)
       return
 
-    if (root.queue.length === 0) {
-      root.status = "idle"
+    const names = root.selectedNames()
+
+    if (names.length === 0)
       return
-    }
 
-    const pkg = root.queue[0]
+    root.startInstall(names, root.hasAurSelected() ? "aur" : "repo")
+  }
 
-    root.currentPackage = pkg.name
-    root.currentSource = pkg.source
+  function install(entry) {
+    if (!entry || !entry.name || root.busy)
+      return
+
+    root.startInstall([entry.name], entry.source === "aur" ? "aur" : "repo")
+  }
+
+  function startInstall(names, source) {
+    root.pendingNames = names
+    root.currentSource = source
+    root.currentPackage = names.length === 1 ? names[0] : names.length + " packages"
     root.log = []
     root.progress = -1
     root.error = ""
@@ -345,9 +383,9 @@ Singleton {
 
   function installCommand() {
     if (root.currentSource === "aur")
-      return ["yay", "-S", "--noconfirm", "--sudoloop", root.currentPackage]
+      return ["yay", "-S", "--noconfirm", "--sudoloop"].concat(root.pendingNames)
 
-    return ["sudo", "-n", "pacman", "-Sy", "--noconfirm", root.currentPackage]
+    return ["sudo", "-n", "pacman", "-Sy", "--noconfirm"].concat(root.pendingNames)
   }
 
   function cancel() {
@@ -367,14 +405,13 @@ Singleton {
   }
 
   function finishInstall(exitCode) {
-    root.queue = root.queue.slice(1)
-
     if (root.cancelled) {
       root.status = "cancelled"
       root.error = "Cancelled"
     } else if (exitCode === 0) {
       root.status = "done"
       root.progress = 1
+      root.selectNone()
       root.refreshInstalled()
       root.runSearch()
     } else {
@@ -383,9 +420,6 @@ Singleton {
     }
 
     finishTimer.restart()
-
-    if (root.queue.length > 0)
-      queueTimer.restart()
   }
 
   function appendLog(line) {
@@ -430,13 +464,6 @@ Singleton {
     interval: 8000
     repeat: false
     onTriggered: root.dismiss()
-  }
-
-  Timer {
-    id: queueTimer
-    interval: 1500
-    repeat: false
-    onTriggered: root.startNext()
   }
 
   Process {

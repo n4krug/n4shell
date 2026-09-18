@@ -7,9 +7,10 @@ import Quickshell.Io
 Singleton {
   id: root
 
-  property var pending: []
-  property var pendingNames: []
+  property var installed: []
   property bool refreshing: false
+
+  property string mode: "deps"
 
   property string status: "idle"
   property string currentPackage: ""
@@ -23,123 +24,146 @@ Singleton {
   property string password: ""
 
   property var selected: ({})
+  property var pendingNames: []
 
-  readonly property bool busy: root.status === "checking" || root.status === "auth" || root.status === "updating"
+  readonly property var entries: root.installed
+  readonly property bool busy: root.status === "checking" || root.status === "auth" || root.status === "removing"
   readonly property bool needsPassword: root.status === "auth"
   readonly property bool active: root.busy || finishTimer.running
   readonly property string lastLogLine: root.log.length > 0 ? root.log[root.log.length - 1] : ""
-  readonly property var entries: root.pending
-  readonly property int pendingCount: root.pending.length
-  readonly property int selectedCount: root.pending.filter(entry => root.selected[entry.name] === true).length
-
-  property int updateCount: 0
-  readonly property int updateThreshold: 10
+  readonly property int pendingCount: root.installed.length
+  readonly property int selectedCount: root.installed.filter(entry => root.selected[entry.name] === true).length
 
   readonly property string statusLabel: {
     switch (root.status) {
       case "checking": return "Checking permissions"
       case "auth": return "Password required"
-      case "updating": return "Updating"
-      case "done": return "Updated"
+      case "removing": return "Removing"
+      case "done": return "Removed"
       case "failed": return "Failed"
       case "cancelled": return "Cancelled"
       default: return ""
     }
   }
 
-  property var repoPending: []
-  property var aurPending: []
-  property bool repoDone: true
-  property bool aurDone: true
-  property int generation: 0
-  property int repoGen: -1
-  property int aurGen: -1
+  readonly property string removeFlag: {
+    if (root.mode === "pkg") return "-R"
+    if (root.mode === "purge") return "-Rns"
+
+    return "-Rs"
+  }
+
+  property var infoEntries: []
+  property var foreignNames: ({})
+  property bool infoDone: true
+  property bool foreignDone: true
 
   function refresh() {
     if (root.busy)
       return
 
-    root.generation++
     root.refreshing = true
-    root.repoPending = []
-    root.aurPending = []
-    root.repoDone = false
-    root.aurDone = false
-    root.repoGen = root.generation
-    root.aurGen = root.generation
+    root.infoEntries = []
+    root.foreignNames = ({})
+    root.infoDone = false
+    root.foreignDone = false
 
-    repoProc.running = false
-    repoProc.command = ["checkupdates", "--nocolor"]
-    repoProc.running = true
+    infoProc.running = false
+    infoProc.command = ["pacman", "-Qi"]
+    infoProc.running = true
 
-    aurProc.running = false
-    aurProc.command = ["yay", "-Qua"]
-    aurProc.running = true
+    foreignProc.running = false
+    foreignProc.command = ["pacman", "-Qqm"]
+    foreignProc.running = true
   }
 
-  function onRepoFinished(text) {
-    if (root.repoGen !== root.generation)
-      return
-
-    root.repoPending = root.parsePending(text, "repo")
-    root.repoDone = true
+  function onInfoFinished(text) {
+    root.infoEntries = root.parseInstalled(text)
+    root.infoDone = true
     root.merge()
   }
 
-  function onAurFinished(text) {
-    if (root.aurGen !== root.generation)
-      return
-
-    root.aurPending = root.parsePending(text, "aur")
-    root.aurDone = true
-    root.merge()
-  }
-
-  function parsePending(text, source) {
-    const out = []
+  function onForeignFinished(text) {
+    const names = ({})
 
     String(text).split("\n").forEach(line => {
-      const trimmed = line.trim()
+      const name = line.trim()
 
-      if (trimmed.length === 0)
-        return
-
-      const match = /^(\S+)\s+(\S+)\s*->\s*(\S+)/.exec(trimmed)
-
-      if (!match)
-        return
-
-      out.push({
-        name: match[1],
-        from: match[2],
-        to: match[3],
-        source: source
-      })
+      if (name)
+        names[name] = true
     })
+
+    root.foreignNames = names
+    root.foreignDone = true
+    root.merge()
+  }
+
+  function parseInstalled(text) {
+    const out = []
+    let current = null
+
+    String(text).split("\n").forEach(line => {
+      if (line.trim().length === 0) {
+        if (current) {
+          out.push(current)
+          current = null
+        }
+
+        return
+      }
+
+      const split = line.indexOf(":")
+
+      if (split <= 0)
+        return
+
+      const key = line.slice(0, split).trim()
+      const value = line.slice(split + 1).trim()
+
+      if (key === "Name") {
+        if (current)
+          out.push(current)
+
+        current = {
+          name: value,
+          version: "",
+          description: "",
+          size: "",
+          repo: "",
+          source: "repo"
+        }
+      } else if (current) {
+        if (key === "Version")
+          current.version = value
+        else if (key === "Description")
+          current.description = value
+        else if (key === "Installed Size")
+          current.size = value
+      }
+    })
+
+    if (current)
+      out.push(current)
 
     return out
   }
 
   function merge() {
-    if (!root.repoDone || !root.aurDone)
+    if (!root.infoDone || !root.foreignDone)
       return
 
-    const byName = ({})
+    const list = root.infoEntries
 
-    root.repoPending.forEach(entry => {
-      byName[entry.name] = entry
+    list.forEach(entry => {
+      if (root.foreignNames[entry.name]) {
+        entry.source = "aur"
+        entry.repo = "aur"
+      }
     })
-
-    root.aurPending.forEach(entry => {
-      if (!byName[entry.name])
-        byName[entry.name] = entry
-    })
-
-    const list = Object.keys(byName).map(key => byName[key])
 
     list.sort((a, b) => a.name.localeCompare(b.name))
 
-    root.pending = list
+    root.installed = list
 
     const next = ({})
 
@@ -164,7 +188,7 @@ Singleton {
   function selectAll() {
     const next = ({})
 
-    root.pending.forEach(entry => {
+    root.installed.forEach(entry => {
       next[entry.name] = true
     })
 
@@ -176,11 +200,7 @@ Singleton {
   }
 
   function selectedNames() {
-    return root.pending.filter(entry => root.isSelected(entry.name)).map(entry => entry.name)
-  }
-
-  function hasAurSelected() {
-    return root.pending.some(entry => entry.source === "aur" && root.isSelected(entry.name))
+    return root.installed.filter(entry => root.isSelected(entry.name)).map(entry => entry.name)
   }
 
   function commitSelected() {
@@ -199,7 +219,7 @@ Singleton {
     root.lockedDb = false
     root.cancelled = false
     root.pendingNames = names
-    root.requireAuth("update")
+    root.requireAuth("remove")
   }
 
   function requireAuth(action) {
@@ -250,26 +270,21 @@ Singleton {
       return
     }
 
-    root.beginUpdate()
+    root.beginRemove()
   }
 
-  function beginUpdate() {
-    const command = root.updateCommand()
+  function beginRemove() {
+    const command = root.removeCommand()
 
-    root.status = "updating"
+    root.status = "removing"
     root.appendLog("$ " + command.join(" "))
-    updateProc.running = false
-    updateProc.command = command
-    updateProc.running = true
+    removeProc.running = false
+    removeProc.command = command
+    removeProc.running = true
   }
 
-  function updateCommand() {
-    const names = root.pendingNames
-
-    if (root.hasAurSelected())
-      return ["yay", "-Sy", "--noconfirm", "--sudoloop"].concat(names)
-
-    return ["sudo", "-n", "pacman", "-Sy", "--noconfirm"].concat(names)
+  function removeCommand() {
+    return ["sudo", "-n", "pacman", root.removeFlag, "--noconfirm"].concat(root.pendingNames)
   }
 
   function cancel() {
@@ -278,23 +293,24 @@ Singleton {
 
     root.cancelled = true
 
-    if (updateProc.running)
-      updateProc.signal(15)
+    if (removeProc.running)
+      removeProc.signal(15)
     else
-      root.finishUpdate(1)
+      root.finishRemove(1)
   }
 
   function clearLock() {
     root.requireAuth("unlock")
   }
 
-  function finishUpdate(exitCode) {
+  function finishRemove(exitCode) {
     if (root.cancelled) {
       root.status = "cancelled"
       root.error = "Cancelled"
     } else if (exitCode === 0) {
       root.status = "done"
       root.progress = 1
+      root.selectNone()
       PackageManager.refreshInstalled()
       root.refresh()
     } else {
@@ -303,7 +319,6 @@ Singleton {
     }
 
     finishTimer.restart()
-    UpdateManager.refreshCount()
   }
 
   function appendLog(line) {
@@ -336,14 +351,6 @@ Singleton {
     finishTimer.stop()
   }
 
-  readonly property bool updatesAvailable: updateCount > updateThreshold
-
-  function refreshCount() {
-    if (countProc.running) return
-    countProc.running = false
-    countProc.running = true
-  }
-
   Timer {
     id: finishTimer
     interval: 8000
@@ -351,42 +358,21 @@ Singleton {
     onTriggered: root.dismiss()
   }
 
-  Timer {
-    id: countTimer
-    interval: 15*60*1000
-    repeat: true
-    running: true
-    triggeredOnStart: true
-    onTriggered: root.refreshCount()
-  }
-
   Process {
-    id: countProc
-    command: ["checkupdates", "--nocolor"]
+    id: infoProc
     running: false
-    stdout: StdioCollector { id: countOut }
-    stderr: StdioCollector {}
-    onExited: exitCode => {
-      if(exitCode === 0)
-        root.updateCount = root.parsePending(countOut.text, "repo").length
+
+    stdout: StdioCollector {
+      onStreamFinished: root.onInfoFinished(this.text)
     }
   }
 
   Process {
-    id: repoProc
+    id: foreignProc
     running: false
 
     stdout: StdioCollector {
-      onStreamFinished: root.onRepoFinished(this.text)
-    }
-  }
-
-  Process {
-    id: aurProc
-    running: false
-
-    stdout: StdioCollector {
-      onStreamFinished: root.onAurFinished(this.text)
+      onStreamFinished: root.onForeignFinished(this.text)
     }
   }
 
@@ -431,7 +417,7 @@ Singleton {
   }
 
   Process {
-    id: updateProc
+    id: removeProc
     running: false
 
     stdout: SplitParser {
@@ -444,6 +430,6 @@ Singleton {
       onRead: data => root.appendLog(data)
     }
 
-    onExited: exitCode => root.finishUpdate(exitCode)
+    onExited: exitCode => root.finishRemove(exitCode)
   }
 }

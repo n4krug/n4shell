@@ -50,24 +50,53 @@ MenuPage {
     }
 
     MenuRow {
-        kind: "action"
-        title: "Install"
-        subtitle: PackageManager.busy
-            ? PackageManager.statusLabel + " " + PackageManager.currentPackage
-            : ""
-        icon: "download"
-        onTriggered: CenterMenu.openMenu("installer", Hyprland.focusedMonitor)
-    }
+        kind: "submenu"
+        title: "Packages"
+        icon: "package_2"
+        page: packagePage
 
-    MenuRow {
-        kind: "action"
-        title: "Update"
-        subtitle: UpdateManager.busy
-            ? UpdateManager.statusLabel + " " + UpdateManager.currentPackage
-            : UpdateManager.pendingCount > 0
-                ? UpdateManager.pendingCount + " updates available"
-                : "Up to date"
-        icon: "upgrade"
-        onTriggered: CenterMenu.openMenu("updater", Hyprland.focusedMonitor)
+        Component {
+            id: packagePage
+
+            MenuPage {
+                title: "Packages"
+
+                MenuRow {
+                    kind: "action"
+                    title: "Update"
+                    subtitle: UpdateManager.busy
+                        ? UpdateManager.statusLabel + " " + UpdateManager.currentPackage
+                        : UpdateManager.pendingCount > 0
+                            ? UpdateManager.pendingCount + " updates available"
+                            : "Up to date"
+                    icon: "upload"
+                    onTriggered: CenterMenu.openMenu("updater", Hyprland.focusedMonitor)
+                }
+                
+                MenuRow {
+                    kind: "action"
+                    title: "Install"
+                    subtitle: PackageManager.busy
+                        ? PackageManager.statusLabel + " " + PackageManager.currentPackage
+                        : ""
+                    icon: "download"
+                    onTriggered: CenterMenu.openMenu("installer", Hyprland.focusedMonitor)
+                }
+
+                MenuRow {
+                    kind: "action"
+                    title: "Uninstall"
+                    subtitle: UninstallManager.busy
+                        ? UninstallManager.statusLabel + " " + UninstallManager.currentPackage
+                        : UninstallManager.pendingCount > 0
+                            ? UninstallManager.pendingCount + " packages installed"
+                            : ""
+                    icon: "delete"
+                    onTriggered: CenterMenu.openMenu("uninstaller", Hyprland.focusedMonitor)
+                }
+
+
+            }
+        }
     }
 }
