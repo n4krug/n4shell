@@ -17,10 +17,6 @@ Container {
     boxHeight: 48
     boxWidth: 256
 
-    Component.onCompleted: {
-        console.log(JSON.stringify(modelData, null, 2))
-    }
-
     anchors {
         top: undefined
     }
@@ -96,7 +92,6 @@ Container {
 
         TapHandler {
             onTapped: {
-                console.log("Dissmissing")
                 root.modelData.dismiss()
             }
         }
@@ -109,7 +104,6 @@ Container {
         repeat: false
         running: true
         onTriggered: {
-            console.log("Dissmissing")
             root.modelData.dismiss()
         }
     }

@@ -23,7 +23,7 @@ Item {
         DrawRegistry.removeItem(this)
     }
 
-    onGeometryChanged: DrawRegistry.itemGeometryChanged()
+    onGeometryChanged: DrawRegistry.markDirty()
 
     onXChanged: geometryChanged()
     onYChanged: geometryChanged()

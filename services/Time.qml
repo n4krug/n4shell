@@ -11,39 +11,39 @@ import Quickshell.Io
 Singleton {
   id: root
 
-  property string date
-  property string time
+  property string date: Qt.formatDate(new Date(), "dddd MMMM d yyyy")
+  property string time: Qt.formatDateTime(new Date(), "hh:mm")
 
-  Process {
-	id: timeProc
+//   Process {
+// 	id: timeProc
 
-	command: ["date", "+%H:%M"]
-	running: true
+// 	command: ["date", "+%H:%M"]
+// 	running: true
 
-	stdout: StdioCollector {
-	  onStreamFinished: root.time = this.text
-	}
-  }
+// 	stdout: StdioCollector {
+// 	  onStreamFinished: root.time = this.text
+// 	}
+//   }
 
-  Process {
-	id: dateProc
+//   Process {
+// 	id: dateProc
 
-	command: ["date", "+%A %B %d %Y"]
-	running: true
+// 	command: ["date", "+%A %B %d %Y"]
+// 	running: true
 
-	stdout: StdioCollector {
-	  onStreamFinished: root.date = this.text
-	}
-  }
+// 	stdout: StdioCollector {
+// 	  onStreamFinished: root.date = this.text
+// 	}
+//   }
 
   Timer {
-	interval: 1000
-	repeat: true
-	running: true
+   	interval: 1000
+    repeat: true
+    running: true
 
-	onTriggered: {
-	  timeProc.running = true;
-	  dateProc.running = true;
-	}
+    onTriggered: {
+      root.date = Qt.formatDate(new Date(), "dddd MMMM d yyyy")
+      root.time = Qt.formatDateTime(new Date(), "hh:mm")
+ 	  }
   }
 }

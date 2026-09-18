@@ -7,6 +7,24 @@ QtObject {
 
     signal itemGeometryChanged
 
+    // Coalesces the flood of per-property geometryChanged() emissions from every
+    // Container into a single signal per frame. Without this, one animation frame
+    // can emit itemGeometryChanged() dozens of times, each one asking every
+    // DrawCanvas to repaint.
+    property bool dirty: false
+
+    function markDirty() {
+        if (dirty) return
+        dirty = true
+        Qt.callLater(flush)
+    }
+
+    function flush() {
+        if (!dirty) return
+        dirty = false
+        itemGeometryChanged()
+    }
+
     function addItem(item) {
         if (items.indexOf(item) === -1)
             items = items.concat(item)
