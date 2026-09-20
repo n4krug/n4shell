@@ -171,115 +171,186 @@ Item {
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 8
+        Rectangle {
             visible: root.passwordMode
 
-            TextField {
-                id: passwordInput
-                Layout.fillWidth: true
-                placeholderText: "Password..."
-                echoMode: root.passwordVisible ? TextInput.Normal : TextInput.Password
-                inputMethodHints: Qt.ImhSensitiveData
-                padding: 12
-                color: Colors.text
-                placeholderTextColor: Colors.text
-                font.pixelSize: 16
-                background: Rectangle {
-                    color: Colors.highlight
-                    border.width: 0
-                    opacity: 0.15
-                    radius: Colors.radius
-                }
+            color: "transparent"
+            Layout.fillWidth: true
+            implicitHeight: passwordInput.height
 
-                onTextChanged: {
-                    if (root.page && root.page.passwordMode)
-                        root.page.password = passwordInput.text
-                }
+            Rectangle {
+                color: Colors.highlight
+                border.width: 0
+                opacity: 0.15
+                radius: Colors.radius
 
-                Keys.onEscapePressed: root.backRequested()
-
-                Keys.onPressed: event => {
-                    if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key)) {
-                        event.accepted = true;
-                        root.submitPassword();
-                    }
-                }
+                anchors.fill: parent
             }
 
-            Text {
-                text: root.passwordVisible ? "visibility_off" : "visibility"
-                color: Colors.text
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 20
-                font.variableAxes: {
-                    "FILL": 0,
-                    "wght": 400,
-                    "GRAD": 0,
-                    "opsz": 20
+            RowLayout {
+                anchors.fill: parent
+                spacing: 8
+
+
+                Text {
+                    text: "key"
+                    color: Colors.text
+                    font.family: "Material Symbols Rounded" // Or Material Icons
+                    font.pixelSize: 28
+                    font.variableAxes: {
+                        "FILL": 0,
+                        "wght": 400,
+                        "GRAD": 0,
+                        "opsz": 28
+                    }
+                    Layout.preferredWidth: 32 + 6
+                    Layout.leftMargin: 6
+                    horizontalAlignment: Text.AlignHCenter
+
                 }
 
-                TapHandler {
-                    onTapped: {
-                        root.passwordVisible = !root.passwordVisible
-                        passwordInput.forceActiveFocus()
+                TextField {
+                    id: passwordInput
+                    Layout.fillWidth: true
+                    placeholderText: "Password..."
+                    echoMode: root.passwordVisible ? TextInput.Normal : TextInput.Password
+                    inputMethodHints: Qt.ImhSensitiveData
+                    padding: 12
+                    leftPadding: 0
+                    color: Colors.text
+                    placeholderTextColor: Colors.text
+                    font.pixelSize: 16
+
+                    background: Rectangle {
+                        color: "transparent"
+                    }
+
+                    onTextChanged: {
+                        if (root.page && root.page.passwordMode)
+                            root.page.password = passwordInput.text
+                    }
+
+                    Keys.onEscapePressed: root.backRequested()
+
+                    Keys.onPressed: event => {
+                        if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key)) {
+                            event.accepted = true;
+                            root.submitPassword();
+                        }
+                    }
+                }
+
+                Text {
+                    Layout.rightMargin: 16
+                    text: root.passwordVisible ? "visibility_off" : "visibility"
+                    color: Colors.text
+                    font.family: "Material Symbols Rounded"
+                    font.pixelSize: 20
+                    font.variableAxes: {
+                        "FILL": 0,
+                        "wght": 400,
+                        "GRAD": 0,
+                        "opsz": 20
+                    }
+
+                    TapHandler {
+                        onTapped: {
+                            root.passwordVisible = !root.passwordVisible
+                            passwordInput.forceActiveFocus()
+                        }
                     }
                 }
             }
         }
 
-        TextField {
-            id: input
-            Layout.fillWidth: true
+        Rectangle {
             visible: !root.passwordMode
-            placeholderText: "Search..."
-            padding: 12
-            color: Colors.text
-            placeholderTextColor: Colors.text
-            font.pixelSize: 16
-            background: Rectangle {
+
+            color: "transparent"
+            Layout.fillWidth: true
+            implicitHeight: input.height
+
+            Rectangle {
                 color: Colors.highlight
                 border.width: 0
                 opacity: 0.15
                 radius: Colors.radius
+                anchors.fill: parent
             }
 
-            onTextChanged: {
-                root.query = text
-                list.currentIndex = filtered.values.length > 0 ? 0 : -1
-            }
+            RowLayout {
+                anchors.fill: parent
+                
 
-            Keys.onEscapePressed: {
-                if (root.query !== "")
-                    input.text = ""
-                else
-                    root.backRequested()
-            }
+                Text {
+                    text: "search"
+                    color: Colors.text
+                    font.family: "Material Symbols Rounded" // Or Material Icons
+                    font.pixelSize: 28
+                    font.variableAxes: {
+                        "FILL": 0,
+                        "wght": 400,
+                        "GRAD": 0,
+                        "opsz": 28
+                    }
 
-            Keys.onPressed: event => {
-                const ctrl = event.modifiers & Qt.ControlModifier;
+                    Layout.preferredWidth: 32 + 8
+                    Layout.leftMargin: 8
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
-                if (event.key === Qt.Key_Up || event.key === Qt.Key_K && ctrl) {
-                    event.accepted = true;
-                    if (list.currentIndex > 0)
-                        list.currentIndex--;
-                } else if (event.key === Qt.Key_Down || event.key === Qt.Key_J && ctrl) {
-                    event.accepted = true;
-                    if (list.currentIndex < list.count - 1)
-                        list.currentIndex++;
-                } else if (event.key === Qt.Key_Right) {
-                    event.accepted = true;
-                    root.nudgeCurrent(1)
-                } else if (event.key === Qt.Key_Left) {
-                    event.accepted = true;
-                    root.nudgeCurrent(-1)
-                } else if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key)) {
-                    event.accepted = true;
-                    root.activateCurrent();
-                } else if (event.key === Qt.Key_Q && ctrl) {
-                    event.accepted = true;
-                    root.closeRequested();
+                TextField {
+                    id: input
+                    Layout.fillWidth: true
+                    visible: !root.passwordMode
+                    placeholderText: "Search..."
+                    padding: 12
+                    leftPadding: 0
+                    color: Colors.text
+                    placeholderTextColor: Colors.text
+                    font.pixelSize: 16
+
+                    background: Rectangle {
+                        color: "transparent"
+                    }
+
+                    onTextChanged: {
+                        root.query = text
+                        list.currentIndex = filtered.values.length > 0 ? 0 : -1
+                    }
+
+                    Keys.onEscapePressed: {
+                        if (root.query !== "")
+                            input.text = ""
+                        else
+                            root.backRequested()
+                    }
+
+                    Keys.onPressed: event => {
+                        const ctrl = event.modifiers & Qt.ControlModifier;
+
+                        if (event.key === Qt.Key_Up || event.key === Qt.Key_K && ctrl) {
+                            event.accepted = true;
+                            if (list.currentIndex > 0)
+                                list.currentIndex--;
+                        } else if (event.key === Qt.Key_Down || event.key === Qt.Key_J && ctrl) {
+                            event.accepted = true;
+                            if (list.currentIndex < list.count - 1)
+                                list.currentIndex++;
+                        } else if (event.key === Qt.Key_Right) {
+                            event.accepted = true;
+                            root.nudgeCurrent(1)
+                        } else if (event.key === Qt.Key_Left) {
+                            event.accepted = true;
+                            root.nudgeCurrent(-1)
+                        } else if ([Qt.Key_Return, Qt.Key_Enter].includes(event.key)) {
+                            event.accepted = true;
+                            root.activateCurrent();
+                        } else if (event.key === Qt.Key_Q && ctrl) {
+                            event.accepted = true;
+                            root.closeRequested();
+                        }
+                    }
                 }
             }
         }

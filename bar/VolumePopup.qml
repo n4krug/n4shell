@@ -111,26 +111,35 @@ Container {
             Layout.fillWidth: true
             height: 8
             radius: Colors.radius
-            color: Colors.bg2
+            // color: Colors.bg2
+            color: "transparent"
+
+            Rectangle {
+                anchors.fill: parent
+                radius: Colors.radius
+                color: Colors.text
+                opacity: 0.10
+            }
+            
+            Rectangle {
+                height: barBg.height
+                color: Colors.highlight
+                anchors {
+                    right: barBg.right
+                    left: barBg.left
+                    // leftMargin: icon.width + row.spacing
+                    rightMargin: animatedRightMargin
+                }
+                property real animatedRightMargin: (barBg.width - barBg.height) * (1-root.volume)
+                Behavior on animatedRightMargin {
+                    NumberAnimation {
+                        duration: 100
+                        easing.type: Easing.Linear
+                    }
+                }
+                radius: Colors.radius
+            }
         }
 
-        Rectangle {
-            height: barBg.height
-            color: Colors.highlight
-            anchors {
-                right: barBg.right
-                left: barBg.left
-                // leftMargin: icon.width + row.spacing
-                rightMargin: animatedRightMargin
-            }
-            property real animatedRightMargin: barBg.width * (1-root.volume)
-            Behavior on animatedRightMargin {
-                NumberAnimation {
-                    duration: 100
-                    easing.type: Easing.Linear
-                }
-            }
-            radius: Colors.radius
-        }
     }
 }
