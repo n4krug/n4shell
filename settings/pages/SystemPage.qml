@@ -26,7 +26,7 @@ MenuPage {
 
         title: "Logout"
         icon: "logout"
-        command: ["loginctl", "terminate-session", "$XDG_SESSION_ID"]
+        command: ["hyprshutdown", "-t", "'Logging out...'"]
     }
 
     MenuRow {
