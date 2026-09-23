@@ -18,7 +18,11 @@ Item {
 
     property real margin: 6
 
-        property real iconSize: Colors.barHeight - margin 
+        property real iconSize: Colors.barHeight - margin
+
+    // Tray icon currently under the cursor, used to keep the right click menu
+    // open while the pointer is still on its anchor.
+    property Item hoveredTray: null
 
     Container {
         id: iconContainer
@@ -88,7 +92,7 @@ Item {
                 // }
 
                 boxHeight: root.iconSize
-                boxWidth: iconContainer.hover.hovered ? sysTrayRow.implicitWidth : 0
+                boxWidth: iconContainer.hover.hovered || trayMenu.show ? sysTrayRow.implicitWidth : 0
 
                 Row {
                     id: sysTrayRow
@@ -97,7 +101,6 @@ Item {
                     Repeater {
                         model: SystemTray.items
 
-
                         MouseArea {
                             id: sysItem
                             height: root.iconSize
@@ -105,23 +108,50 @@ Item {
 
                             required property SystemTrayItem modelData
 
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+
                             Image {
                                 source: sysItem.modelData.icon
                                 anchors.fill: parent
                             }
 
-                            onClicked: {
-                                modelData.activate()
+                            function openMenu() {
+                                trayMenu.openFor(sysItem.modelData.menu, sysItem)
+                            }
+
+                            onClicked: mouse => {
+                                const item = sysItem.modelData
+
+                                if (mouse.button === Qt.RightButton) {
+                                    if (item.hasMenu)
+                                        sysItem.openMenu()
+                                    else
+                                        item.secondaryActivate()
+                                    return
+                                }
+
+                                if (item.onlyMenu && item.hasMenu)
+                                    sysItem.openMenu()
+                                else
+                                    item.activate()
+                            }
+
+                            onWheel: wheel => {
+                                sysItem.modelData.scroll(wheel.angleDelta.y)
+                                wheel.accepted = true
                             }
 
                             property bool hovered: false
 
                             onEntered: {
                                 hovered = true
+                                root.hoveredTray = sysItem
                             }
 
                             onExited: {
                                 hovered = false
+                                if (root.hoveredTray === sysItem)
+                                    root.hoveredTray = null
                             }
 
                             hoverEnabled: true
@@ -228,6 +258,25 @@ Item {
                 popupContainer: popup
             }
         }
+    }
+
+    // Submenus reuse the same component, which is why it is declared here
+    // rather than inside TrayMenu.qml.
+    Component {
+        id: trayMenuComponent
+
+        TrayMenu {
+            exclusiveMonitor: root.exclusiveMonitor
+            submenuComponent: trayMenuComponent
+        }
+    }
+
+    TrayMenu {
+        id: trayMenu
+
+        exclusiveMonitor: root.exclusiveMonitor
+        submenuComponent: trayMenuComponent
+        anchorHovered: root.hoveredTray === trayMenu.anchorItem
     }
 
     PopupContainer {
