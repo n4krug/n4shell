@@ -50,6 +50,16 @@ MenuPage {
     }
 
     MenuRow {
+        id: restartWindows
+
+        kind: "action"
+
+        title: "Boot Windows"
+        icon: "view_compact_alt"
+        command: ["sudo", "efibootmgr", "--bootnext", "0000", "&&", "systemctl", "reboot"]
+    }
+
+    MenuRow {
         id: shutdown
 
         kind: "action"
