@@ -46,7 +46,7 @@ MenuPage {
 
         title: "Restart"
         icon: "restart_alt"
-        command: ["hyprshutdown", "-t", "'Restarting...'", "--post-cmd", "'reboot'"]
+        command: ["systemctl", "reboot"]
     }
 
     MenuRow {
@@ -56,6 +56,6 @@ MenuPage {
 
         title: "Shutdown"
         icon: "power_settings_new"
-        command: ["hyprshutdown", "-t", "'Shutting down...'", "--post-cmd", "'shutdown -P", "0'"]
+        command: ["systemctl", "poweroff"]
     }
 }
